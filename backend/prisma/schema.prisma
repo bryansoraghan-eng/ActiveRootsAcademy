@@ -1,0 +1,297 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model School {
+  id                String             @id @default(cuid())
+  name              String             @unique
+  schoolCode        String?            @unique  // 6-char code shared with staff for self-registration
+  address           String?
+  phone             String?
+  principal         String?
+  email             String?
+  teachers          Teacher[]
+  classes           Class[]
+  bookings          Booking[]
+  placements        Placement[]
+  programmes        ProgrammeBlock[]
+  placementStudents PlacementStudent[]
+  users                  User[]
+  lessonPlans            LessonPlan[]
+  generatedProgrammes    GeneratedProgramme[]
+  movementBreakSettings  MovementBreakSettings?
+  movementBreakSchedules MovementBreakSchedule[]
+  createdAt              DateTime           @default(now())
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  name        String
+  role        String   // "admin" | "school_admin" | "teacher" | "coach" | "principal"
+  status      String   @default("active") // "active" | "pending"
+  school      School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  schoolId    String?
+  permissions String   @default("{}") // JSON: custom permission overrides per module
+  createdAt   DateTime @default(now())
+}
+
+model Teacher {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId  String
+  classes   Class[]
+  createdAt DateTime @default(now())
+}
+
+model Class {
+  id          String        @id @default(cuid())
+  name        String
+  yearGroup   String
+  school      School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId    String
+  teacher     Teacher?      @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  teacherId   String?
+  assessments Assessment[]
+  bookings    Booking[]
+  createdAt   DateTime      @default(now())
+}
+
+model ProgrammeBlock {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  duration    Int
+  type        String
+  school      School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId    String
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+}
+
+model Assessment {
+  id        String   @id @default(cuid())
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId   String
+  coach     Coach?   @relation(fields: [coachId], references: [id], onDelete: SetNull)
+  coachId   String?
+  date      DateTime @default(now())
+  notes     String?
+  fmsScores String?
+  createdAt DateTime @default(now())
+}
+
+model Booking {
+  id          String         @id @default(cuid())
+  school      School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId    String
+  class       Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId     String
+  programme   ProgrammeBlock @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  programmeId String
+  coach       Coach?         @relation(fields: [coachId], references: [id], onDelete: SetNull)
+  coachId     String?
+  startDate   DateTime
+  endDate     DateTime
+  status      String
+  createdAt   DateTime       @default(now())
+}
+
+model Coach {
+  id             String       @id @default(cuid())
+  name           String
+  email          String       @unique
+  phone          String?
+  specialisation String?
+  isPlacement    Boolean      @default(false)
+  placements     Placement[]
+  bookings       Booking[]
+  assessments    Assessment[]
+  createdAt      DateTime     @default(now())
+}
+
+model Placement {
+  id        String   @id @default(cuid())
+  coach     Coach    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId   String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId  String
+  hours     Int      @default(0)
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model PlacementStudent {
+  id            String   @id @default(cuid())
+  name          String
+  school        School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId      String
+  yeartarget    String
+  collegeTarget String?
+  notes         String?
+  createdAt     DateTime @default(now())
+}
+
+model MovementBreak {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  duration     Int
+  ageGroup     String
+  instructions String
+  createdAt    DateTime @default(now())
+}
+
+model NutritionLesson {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  resources   String?
+  createdAt   DateTime @default(now())
+}
+
+model NutritionResource {
+  id        String   @id @default(cuid())
+  title     String
+  type      String
+  url       String?
+  content   String?
+  createdAt DateTime @default(now())
+}
+
+// ─── FMS Knowledge Base ────────────────────────────────────────────────────
+
+model FMSSkill {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  slug        String           @unique
+  category    String           // "locomotion" | "object_control" | "stability"
+  description String
+  ageGroups   String           // JSON: ["infants","1st-2nd","3rd-4th","5th-6th"]
+  equipment   String           // JSON array of equipment items
+  spaceNeeded String           @default("both") // "hall" | "outdoor" | "both"
+  tags        String           // JSON array
+  isScoilnet  Boolean          @default(true)
+  version     Int              @default(1)
+  progressions FMSProgression[]
+  cues        FMSCue[]
+  errors      FMSCommonError[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model FMSProgression {
+  id          String   @id @default(cuid())
+  skill       FMSSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId     String
+  direction   String   // "progression" | "regression"
+  description String
+  ageGroup    String?
+  difficulty  Int      // 1=easiest 5=hardest
+  notes       String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model FMSCue {
+  id        String   @id @default(cuid())
+  skill     FMSSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId   String
+  cue       String
+  ageGroup  String?  // null = all ages
+  cueType   String   @default("verbal") // "verbal" | "visual" | "kinaesthetic"
+  createdAt DateTime @default(now())
+}
+
+model FMSCommonError {
+  id         String   @id @default(cuid())
+  skill      FMSSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId    String
+  error      String
+  correction String
+  ageGroup   String?
+  createdAt  DateTime @default(now())
+}
+
+// ─── Movement Break Scheduler ─────────────────────────────────────────────
+
+model MovementBreakSettings {
+  id        String   @id @default(cuid())
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId  String   @unique
+  minBreaks Int      @default(4)
+  duration  Int      @default(2)
+  isEnabled Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model MovementBreakSchedule {
+  id        String   @id @default(cuid())
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  schoolId  String?
+  teacherId String?
+  ageRange  String   @default("6-8")
+  mode      String   @default("mixed")
+  slots     String   @default("[]")
+  generated String   @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Food Database ────────────────────────────────────────────────────────
+
+model FoodItem {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  category    String   // "breakfast" | "lunchbox" | "snack" | "drink" | "fruit" | "vegetable"
+  mealTypes   String   // JSON: ["breakfast","lunchbox","snack"]
+  ageGroups   String   // JSON: ["4-5","6-7","8-9","10-11","12+"] or ["all"]
+  allergens   String   // JSON: [] allergen strings present in this food
+  preferences String   // JSON: ["sweet","savoury","crunchy","soft","fruity","veggie-based"]
+  description String   // serving suggestion / brief note
+  createdAt   DateTime @default(now())
+}
+
+// ─── Lesson Plans ──────────────────────────────────────────────────────────
+
+model LessonPlan {
+  id           String   @id @default(cuid())
+  title        String
+  classLevel   String   // "Infants" | "1st-2nd" | "3rd-4th" | "5th-6th"
+  duration     Int      // minutes
+  skillFocus   String   // JSON array of skill names
+  warmUp       String
+  mainActivity String
+  coolDown     String
+  equipment    String?  // JSON array
+  notes        String?
+  school       School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  schoolId     String?
+  generatedBy  String   @default("ai") // "ai" | "manual"
+  createdAt    DateTime @default(now())
+}
+
+// ─── Multi-Week Generated Programmes ─────────────────────────────────────────
+
+model GeneratedProgramme {
+  id           String   @id @default(cuid())
+  title        String
+  classLevel   String
+  totalWeeks   Int
+  skillFocus   String   // JSON array
+  equipment    String   // JSON array of selected equipment
+  weeks        String   // JSON array of WeekPlan objects
+  school       School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  schoolId     String?
+  generatedBy  String   @default("ai")
+  createdAt    DateTime @default(now())
+}
