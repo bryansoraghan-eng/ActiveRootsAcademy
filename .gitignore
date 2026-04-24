@@ -1,31 +1,28 @@
 # Dependencies
 node_modules/
-.pnp/
-.pnp.js
 
-# Build outputs
-dist/
-build/
-*.log
-
-# Environment
+# Environment variables — NEVER commit these
 .env
 .env.local
 .env.*.local
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# Build output
+dist/
+build/
+backend/dist/
+
+# Database
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Database
-*.db
-*.sqlite
-
-# Misc
-*.tgz
+# IDE
+.vscode/
+.idea/
