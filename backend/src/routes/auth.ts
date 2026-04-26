@@ -5,6 +5,21 @@ import prisma from '../db';
 
 const router = express.Router();
 
+// ── First-time admin setup (only works when no admin users exist) ─────────────
+router.post('/setup', async (req, res) => {
+  try {
+    const existing = await prisma.user.findFirst({ where: { role: 'admin' } });
+    if (existing) return res.status(403).json({ error: 'Setup already complete.' });
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'name, email and password required.' });
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({ data: { name, email, password: hashed, role: 'admin', status: 'active' } });
+    res.json({ message: 'Admin account created.', email: user.email });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── School code generation ────────────────────────────────────────────────────
 function generateSchoolCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
