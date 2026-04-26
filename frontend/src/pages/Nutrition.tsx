@@ -34,30 +34,6 @@ const ALLERGY_OPTIONS = ['nut-free', 'dairy-free', 'gluten-free', 'egg-free', 's
 const GOAL_OPTIONS = ['energy boost', 'focus & concentration', 'trying new foods', 'healthier snacks', 'balanced diet', 'hydration'];
 const PICKY_LEVELS = ['mild', 'moderate', 'severe'];
 
-function PlanSection({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">{icon}</span>
-        <h3 className="font-semibold text-slate-800 text-sm">{title}</h3>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function BulletList({ items }: { items: string[] }) {
-  return (
-    <ul className="space-y-1.5">
-      {items.map((item, i) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-          <span className="text-green-500 mt-0.5 flex-shrink-0">•</span>
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function Nutrition() {
   const [tab, setTab] = useState<Tab>('expert');
