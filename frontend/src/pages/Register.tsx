@@ -29,8 +29,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ message: string; pending: boolean } | null>(null);
 
+  const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
+
   useEffect(() => {
-    fetch('http://localhost:4000/api/auth/schools')
+    fetch(`${BASE}/auth/schools`)
       .then(r => r.json())
       .then(setSchools)
       .catch(() => {});
@@ -43,7 +45,7 @@ export default function Register() {
     if (code.length < 4) { setCodeStatus('idle'); setResolvedSchool(null); return; }
     setCodeStatus('checking');
     try {
-      const res = await fetch(`http://localhost:4000/api/auth/validate-school-code/${code.toUpperCase()}`);
+      const res = await fetch(`${BASE}/auth/validate-school-code/${code.toUpperCase()}`);
       if (res.ok) {
         const school = await res.json();
         setResolvedSchool(school);
@@ -97,7 +99,7 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/auth/register', {
+      const res = await fetch(`${BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

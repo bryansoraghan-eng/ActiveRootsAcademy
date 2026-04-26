@@ -15,8 +15,10 @@ export default function TeacherRegister() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
+
   useEffect(() => {
-    fetch('http://localhost:4000/api/auth/schools')
+    fetch(`${BASE}/auth/schools`)
       .then(r => r.json())
       .then(setSchools)
       .catch(() => {});
@@ -44,7 +46,7 @@ export default function TeacherRegister() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/auth/register-teacher', {
+      const res = await fetch(`${BASE}/auth/register-teacher`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
