@@ -16,6 +16,7 @@ import fmsRoutes from './routes/fms';
 import lessonPlanRoutes from './routes/lessonPlans';
 import userRoutes from './routes/users';
 import movementBreakSchedulerRoutes from './routes/movementBreakScheduler';
+import breakCompletionsRoutes from './routes/breakCompletions';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/fms', fmsRoutes);
 app.use('/api/lesson-plans', lessonPlanRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/movement-breaks-scheduler', movementBreakSchedulerRoutes);
+app.use('/api/break-completions', breakCompletionsRoutes);
 
 // Test endpoint
 app.get("/", (req, res) => {

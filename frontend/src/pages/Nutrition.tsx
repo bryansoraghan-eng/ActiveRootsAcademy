@@ -202,33 +202,35 @@ export default function Nutrition() {
     }`;
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div>
+      <div className="ara-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Nutrition & Movement</h1>
-          <p className="text-slate-500 text-sm mt-0.5">AI-powered nutrition guidance, lessons, resources, and classroom movement breaks</p>
+          <h1 className="ara-page-title">Nutrition &amp; Movement</h1>
+          <p className="ara-page-subtitle">AI-powered nutrition guidance, lessons, resources, and classroom movement breaks</p>
         </div>
         {tab !== 'expert' && (
-          <button
-            onClick={() => {
-              if (tab === 'lessons') setShowLesson(true);
-              else if (tab === 'resources') setShowResource(true);
-              else setShowBreak(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-          >
-            + Add {tab === 'lessons' ? 'Lesson' : tab === 'resources' ? 'Resource' : 'Movement Break'}
-          </button>
+          <div className="ara-page-header-actions">
+            <button type="button"
+              onClick={() => {
+                if (tab === 'lessons') setShowLesson(true);
+                else if (tab === 'resources') setShowResource(true);
+                else setShowBreak(true);
+              }}
+              className="ara-btn ara-btn-primary">
+              + Add {tab === 'lessons' ? 'Lesson' : tab === 'resources' ? 'Resource' : 'Movement Break'}
+            </button>
+          </div>
         )}
       </div>
 
-      {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+      <div className="ara-page">
+      {error && <div className="ara-error">{error}</div>}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="ara-tabs">
         {tabs.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${tab === t.key ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+          <button key={t.key} type="button" onClick={() => setTab(t.key)}
+            className={`ara-tab${tab === t.key ? ' ara-tab-active' : ''}`}>
             <span>{t.icon}</span>{t.label}
           </button>
         ))}
@@ -487,7 +489,7 @@ export default function Nutrition() {
                   <p className="text-sm text-slate-500 mt-0.5">{l.description}</p>
                 </div>
               </div>
-              <button onClick={() => setDeleteTarget({ id: l.id, type: 'lessons', name: l.title })}
+              <button type="button" onClick={() => setDeleteTarget({ id: l.id, type: 'lessons', name: l.title })}
                 className="text-sm text-slate-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition flex-shrink-0">Delete</button>
             </div>
           ))}
@@ -505,7 +507,7 @@ export default function Nutrition() {
             <div key={r.id} className="bg-white rounded-xl border border-slate-200 p-5">
               <div className="flex items-start justify-between mb-3">
                 <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium capitalize">{r.type}</span>
-                <button onClick={() => setDeleteTarget({ id: r.id, type: 'resources', name: r.title })}
+                <button type="button" onClick={() => setDeleteTarget({ id: r.id, type: 'resources', name: r.title })}
                   className="text-xs text-slate-400 hover:text-red-600 transition">Delete</button>
               </div>
               <p className="font-semibold text-slate-800 text-sm mb-1">{r.title}</p>
@@ -539,7 +541,7 @@ export default function Nutrition() {
                     </div>
                   </div>
                 </div>
-                <button onClick={() => setDeleteTarget({ id: b.id, type: 'breaks', name: b.title })}
+                <button type="button" onClick={() => setDeleteTarget({ id: b.id, type: 'breaks', name: b.title })}
                   className="text-sm text-slate-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition">Delete</button>
               </div>
               <p className="text-sm text-slate-500 ml-13 mt-2">{b.description}</p>
@@ -556,10 +558,11 @@ export default function Nutrition() {
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">Loading…</div>
       )}
 
+      </div>{/* end ara-page */}
+
       {/* Add Lesson modal */}
       {showLesson && (
-        <Modal onClose={() => setShowLesson(false)}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-5">Add Nutrition Lesson</h2>
+        <Modal onClose={() => setShowLesson(false)} title="Add Nutrition Lesson">
           <form onSubmit={handleAddLesson} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
@@ -594,8 +597,8 @@ export default function Nutrition() {
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Resource title" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
-              <select value={resForm.type} onChange={e => setResForm(f => ({ ...f, type: e.target.value }))}
+              <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="res-type">Type</label>
+              <select id="res-type" value={resForm.type} onChange={e => setResForm(f => ({ ...f, type: e.target.value }))}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white capitalize">
                 {RESOURCE_TYPES.map(t => <option key={t} value={t} className="capitalize">{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
               </select>
@@ -606,8 +609,9 @@ export default function Nutrition() {
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://…" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notes <span className="text-slate-400 font-normal">(optional)</span></label>
-              <textarea value={resForm.content} onChange={e => setResForm(f => ({ ...f, content: e.target.value }))} rows={2}
+              <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="res-notes">Notes <span className="text-slate-400 font-normal">(optional)</span></label>
+              <textarea id="res-notes" value={resForm.content} onChange={e => setResForm(f => ({ ...f, content: e.target.value }))} rows={2}
+                placeholder="Optional notes…"
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
             </div>
             <div className="flex gap-3 pt-2">
@@ -622,8 +626,7 @@ export default function Nutrition() {
 
       {/* Add Movement Break modal */}
       {showBreak && (
-        <Modal onClose={() => setShowBreak(false)}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-5">Add Movement Break</h2>
+        <Modal onClose={() => setShowBreak(false)} title="Add Movement Break">
           <form onSubmit={handleAddBreak} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
@@ -632,15 +635,15 @@ export default function Nutrition() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Age group</label>
-                <select value={breakForm.ageGroup} onChange={e => setBreakForm(f => ({ ...f, ageGroup: e.target.value }))}
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="break-age">Age group</label>
+                <select id="break-age" value={breakForm.ageGroup} onChange={e => setBreakForm(f => ({ ...f, ageGroup: e.target.value }))}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                   {AGE_GROUPS.map(a => <option key={a} value={a}>{AGE_LABELS[a]}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Duration (seconds)</label>
-                <input type="number" min="30" value={breakForm.duration} onChange={e => setBreakForm(f => ({ ...f, duration: e.target.value }))}
+                <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="break-duration">Duration (seconds)</label>
+                <input id="break-duration" type="number" min="30" value={breakForm.duration} onChange={e => setBreakForm(f => ({ ...f, duration: e.target.value }))}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
@@ -667,15 +670,11 @@ export default function Nutrition() {
 
       {/* Delete confirmation */}
       {deleteTarget && (
-        <Modal onClose={() => setDeleteTarget(null)}>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><span className="text-red-600 text-xl">!</span></div>
-            <h3 className="font-semibold text-slate-800 mb-2">Delete item?</h3>
-            <p className="text-slate-500 text-sm mb-6"><strong>{deleteTarget.name}</strong> will be permanently deleted.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteTarget(null)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">Delete</button>
-            </div>
+        <Modal title="Delete item?" onClose={() => setDeleteTarget(null)} size="sm">
+          <p className="ara-confirm-text"><strong>{deleteTarget.name}</strong> will be permanently deleted.</p>
+          <div className="ara-form-footer">
+            <button type="button" onClick={() => setDeleteTarget(null)} className="ara-btn ara-btn-secondary">Cancel</button>
+            <button type="button" onClick={handleDelete} className="ara-btn ara-btn-danger">Delete</button>
           </div>
         </Modal>
       )}

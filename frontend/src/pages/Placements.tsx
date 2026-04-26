@@ -21,6 +21,13 @@ function initials(name: string) {
   return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 }
 
+const AVATAR_COLOURS = ['ara-avatar-blue', 'ara-avatar-sage', 'ara-avatar-clay', 'ara-avatar-neutral'];
+function avatarClass(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_COLOURS[h % AVATAR_COLOURS.length];
+}
+
 export default function Placements() {
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [coaches, setCoaches] = useState<Coach[]>([]);
@@ -40,20 +47,14 @@ export default function Placements() {
         api.get<Coach[]>('/coaches'),
         api.get<School[]>('/schools'),
       ]);
-      setPlacements(pl);
-      setCoaches(co);
-      setSchools(sc);
+      setPlacements(pl); setCoaches(co); setSchools(sc);
     } catch { setError('Failed to load data'); }
     finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
-  const openAdd = () => {
-    setEditing(null);
-    setForm(emptyForm);
-    setShowModal(true);
-  };
+  const openAdd = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
 
   const openEdit = (p: Placement) => {
     setEditing(p);
@@ -71,130 +72,125 @@ export default function Placements() {
       } else {
         await api.post('/placements', payload);
       }
-      setShowModal(false);
-      load();
+      setShowModal(false); load();
     } catch { setError('Failed to save placement'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try {
-      await api.delete(`/placements/${deleteId}`);
-      setDeleteId(null);
-      load();
-    } catch { setError('Failed to delete placement'); }
+    try { await api.delete(`/placements/${deleteId}`); setDeleteId(null); load(); }
+    catch { setError('Failed to delete placement'); }
   };
 
   const totalHours = placements.reduce((sum, p) => sum + p.hours, 0);
   const deleteTarget = placements.find(p => p.id === deleteId);
 
-  // Group by coach for summary cards
   const byCoach = coaches
     .map(c => ({ ...c, items: placements.filter(p => p.coachId === c.id) }))
     .filter(c => c.items.length > 0);
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div>
+      <div className="ara-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Placements</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{placements.length} placement{placements.length !== 1 ? 's' : ''} · {totalHours} total hours logged</p>
+          <h1 className="ara-page-title">Placements</h1>
+          <p className="ara-page-subtitle">
+            {placements.length} placement{placements.length !== 1 ? 's' : ''} · {totalHours} total hours logged
+          </p>
         </div>
-        <button onClick={openAdd} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-          + Add Placement
-        </button>
+        <div className="ara-page-header-actions">
+          <button type="button" onClick={openAdd} className="ara-btn ara-btn-primary">+ Add Placement</button>
+        </div>
       </div>
 
-      {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+      <div className="ara-page">
+        {error && <div className="ara-error">{error}</div>}
 
-      {/* Summary cards by coach */}
-      {byCoach.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {byCoach.map(c => (
-            <div key={c.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                {initials(c.name)}
+        {byCoach.length > 0 && (
+          <div className="ara-placement-cards">
+            {byCoach.map(c => (
+              <div key={c.id} className="ara-placement-card">
+                <div className={`ara-avatar ara-avatar-md ${avatarClass(c.name)}`}>{initials(c.name)}</div>
+                <div className="ara-placement-card-info">
+                  <div className="ara-td-strong">{c.name}</div>
+                  <div className="ara-td-sub">
+                    {c.items.length} school{c.items.length !== 1 ? 's' : ''} · {c.items.reduce((s, p) => s + p.hours, 0)} hrs
+                  </div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="font-medium text-slate-800 text-sm">{c.name}</p>
-                <p className="text-xs text-slate-500">{c.items.length} school{c.items.length !== 1 ? 's' : ''} · {c.items.reduce((s, p) => s + p.hours, 0)} hrs</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400">Loading…</div>
+          <div className="ara-table-wrap"><div className="ara-loading">Loading…</div></div>
         ) : placements.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-xl">🏫</div>
-            <p className="text-slate-500 text-sm">No placements yet — assign a coach to a school to get started</p>
+          <div className="ara-table-wrap">
+            <div className="ara-empty">No placements yet — assign a coach to a school to get started.</div>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Coach</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">School</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Hours</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Notes</th>
-                <th className="px-6 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {placements.map(p => (
-                <tr key={p.id} className="hover:bg-slate-50 transition">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold text-xs flex-shrink-0">
-                        {initials(p.coach.name)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-800 text-sm">{p.coach.name}</p>
-                        <p className="text-xs text-slate-400">{p.coach.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-700">{p.school.name}</td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-semibold text-slate-800">{p.hours}</span>
-                    <span className="text-xs text-slate-400 ml-1">hrs</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate">{p.notes ?? '—'}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(p)} className="text-sm text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition">Edit</button>
-                      <button onClick={() => setDeleteId(p.id)} className="text-sm text-slate-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition">Delete</button>
-                    </div>
-                  </td>
+          <div className="ara-table-wrap">
+            <table className="ara-table">
+              <thead>
+                <tr>
+                  <th className="ara-th">Coach</th>
+                  <th className="ara-th">School</th>
+                  <th className="ara-th">Hours</th>
+                  <th className="ara-th">Notes</th>
+                  <th className="ara-th" aria-label="Actions"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {placements.map(p => (
+                  <tr key={p.id} className="ara-tr">
+                    <td className="ara-td">
+                      <div className="ara-name-cell">
+                        <div className={`ara-avatar ara-avatar-md ${avatarClass(p.coach.name)}`}>{initials(p.coach.name)}</div>
+                        <div>
+                          <div className="ara-td-strong">{p.coach.name}</div>
+                          <div className="ara-td-sub">{p.coach.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="ara-td ara-td-strong">{p.school.name}</td>
+                    <td className="ara-td">
+                      <span className="ara-tag ara-tag-brand">{p.hours} hrs</span>
+                    </td>
+                    <td className="ara-td ara-td-sub ara-td-truncate">
+                      {p.notes ?? '—'}
+                    </td>
+                    <td className="ara-td">
+                      <div className="ara-row-actions">
+                        <button type="button" className="ara-row-action" onClick={() => openEdit(p)}>Edit</button>
+                        <button type="button" className="ara-row-action ara-row-action-danger" onClick={() => setDeleteId(p.id)}>Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {showModal && (
-        <Modal onClose={() => setShowModal(false)}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-5">{editing ? 'Edit Placement' : 'Add Placement'}</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <Modal title={editing ? 'Edit Placement' : 'Add Placement'} onClose={() => setShowModal(false)}>
+          <form onSubmit={handleSubmit}>
             {!editing && (
               <>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Coach</label>
-                  <select required value={form.coachId} onChange={e => setForm(f => ({ ...f, coachId: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <div className="ara-form-group">
+                  <label className="ara-form-label" htmlFor="placement-coach">Coach</label>
+                  <select id="placement-coach" required value={form.coachId}
+                    onChange={e => setForm(f => ({ ...f, coachId: e.target.value }))} className="ara-form-select">
                     <option value="">Select coach…</option>
                     {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">School</label>
-                  <select required value={form.schoolId} onChange={e => setForm(f => ({ ...f, schoolId: e.target.value }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <div className="ara-form-group">
+                  <label className="ara-form-label" htmlFor="placement-school">School</label>
+                  <select id="placement-school" required value={form.schoolId}
+                    onChange={e => setForm(f => ({ ...f, schoolId: e.target.value }))} className="ara-form-select">
                     <option value="">Select school…</option>
                     {schools.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
@@ -202,24 +198,24 @@ export default function Placements() {
               </>
             )}
             {editing && (
-              <div className="bg-slate-50 rounded-lg px-4 py-3 text-sm text-slate-600">
+              <div className="ara-info-block">
                 <strong>{editing.coach.name}</strong> at <strong>{editing.school.name}</strong>
               </div>
             )}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Hours logged</label>
-              <input type="number" min="0" value={form.hours} onChange={e => setForm(f => ({ ...f, hours: e.target.value }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="ara-form-group">
+              <label className="ara-form-label" htmlFor="placement-hours">Hours logged</label>
+              <input id="placement-hours" type="number" min="0" value={form.hours}
+                onChange={e => setForm(f => ({ ...f, hours: e.target.value }))} className="ara-field-input" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notes <span className="text-slate-400 font-normal">(optional)</span></label>
-              <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                placeholder="Any notes about this placement…" />
+            <div className="ara-form-group">
+              <label className="ara-form-label" htmlFor="placement-notes">Notes <span className="ara-td-sub">(optional)</span></label>
+              <textarea id="placement-notes" value={form.notes} rows={2}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                className="ara-field-textarea" placeholder="Any notes about this placement…" />
             </div>
-            <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-sm font-medium transition">
+            <div className="ara-form-footer">
+              <button type="button" className="ara-btn ara-btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+              <button type="submit" disabled={saving} className="ara-btn ara-btn-primary">
                 {saving ? 'Saving…' : editing ? 'Save changes' : 'Add placement'}
               </button>
             </div>
@@ -228,17 +224,13 @@ export default function Placements() {
       )}
 
       {deleteId && (
-        <Modal onClose={() => setDeleteId(null)}>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><span className="text-red-600 text-xl">!</span></div>
-            <h3 className="font-semibold text-slate-800 mb-2">Delete placement?</h3>
-            <p className="text-slate-500 text-sm mb-6">
-              <strong>{deleteTarget?.coach.name}</strong> at <strong>{deleteTarget?.school.name}</strong> will be removed.
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">Delete</button>
-            </div>
+        <Modal title="Delete placement?" onClose={() => setDeleteId(null)} size="sm">
+          <p className="ara-confirm-text">
+            <strong>{deleteTarget?.coach.name}</strong> at <strong>{deleteTarget?.school.name}</strong> will be permanently removed.
+          </p>
+          <div className="ara-form-footer">
+            <button type="button" className="ara-btn ara-btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
+            <button type="button" className="ara-btn ara-btn-danger" onClick={handleDelete}>Delete</button>
           </div>
         </Modal>
       )}

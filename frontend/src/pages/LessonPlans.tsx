@@ -237,34 +237,33 @@ export default function LessonPlans() {
   const displayProgramme = currentProgramme ?? viewingProgramme;
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div>
+      <div className="ara-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Lesson Plans & Programmes</h1>
-          <p className="text-slate-500 text-sm mt-0.5">AI-generated, FMS-aligned content for Irish primary schools</p>
+          <h1 className="ara-page-title">Lesson Plans &amp; Programmes</h1>
+          <p className="ara-page-subtitle">AI-generated, FMS-aligned content for Irish primary schools</p>
         </div>
-        <button
-          onClick={() => mode === 'plans'
-            ? (setShowGenerator(true), setGenerated(null), setPlanError(''), setClassLevel(''), setSelectedSkills([]), setSelectedEquipment([]), setDuration(45))
-            : (setShowProgGenerator(true), setProgError(''), setProgClassLevel(''), setProgSkills([]), setProgEquipment([]), setProgWeeks(6))
-          }
-          className="flex items-center gap-2 bg-[#0f172a] hover:bg-[#1e2a45] text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          {mode === 'plans' ? 'Generate Lesson Plan' : 'Build Programme'}
-        </button>
+        <div className="ara-page-header-actions">
+          <button type="button"
+            onClick={() => mode === 'plans'
+              ? (setShowGenerator(true), setGenerated(null), setPlanError(''), setClassLevel(''), setSelectedSkills([]), setSelectedEquipment([]), setDuration(45))
+              : (setShowProgGenerator(true), setProgError(''), setProgClassLevel(''), setProgSkills([]), setProgEquipment([]), setProgWeeks(6))
+            }
+            className="ara-btn ara-btn-primary">
+            {mode === 'plans' ? '⚡ Generate Lesson Plan' : '📅 Build Programme'}
+          </button>
+        </div>
       </div>
 
+      <div className="ara-page">
       {/* Mode tabs */}
-      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="ara-tabs">
         {[
           { key: 'plans', label: 'Lesson Plans', icon: '📖' },
           { key: 'programmes', label: 'Programme Builder', icon: '📅' },
         ].map(t => (
-          <button key={t.key} onClick={() => setMode(t.key as any)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${mode === t.key ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+          <button key={t.key} type="button" onClick={() => setMode(t.key as any)}
+            className={`ara-tab${mode === t.key ? ' ara-tab-active' : ''}`}>
             <span>{t.icon}</span>{t.label}
           </button>
         ))}
@@ -273,7 +272,7 @@ export default function LessonPlans() {
       {/* ── LESSON PLANS MODE ── */}
       {mode === 'plans' && (
         <>
-          {planError && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{planError}</div>}
+          {planError && <div className="ara-error">{planError}</div>}
           {generating && (
             <div className="bg-white rounded-xl border border-slate-200 p-16 text-center mb-6">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
@@ -283,7 +282,7 @@ export default function LessonPlans() {
           )}
           <div className="flex gap-6">
             <div className={`${displayPlan && !generating ? 'w-72 flex-shrink-0' : 'flex-1'}`}>
-              <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Saved Plans ({saved.length})</h2>
+              <h2 className="ara-section-label">Saved Plans ({saved.length})</h2>
               {loadingPlans ? (
                 <p className="text-slate-400 text-sm">Loading…</p>
               ) : saved.length === 0 ? (
@@ -336,7 +335,7 @@ export default function LessonPlans() {
       {/* ── PROGRAMME BUILDER MODE ── */}
       {mode === 'programmes' && (
         <>
-          {progError && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{progError}</div>}
+          {progError && <div className="ara-error">{progError}</div>}
           {generatingProg && (
             <div className="bg-white rounded-xl border border-slate-200 p-16 text-center mb-6">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
@@ -346,7 +345,7 @@ export default function LessonPlans() {
           )}
           <div className="flex gap-6">
             <div className={`${displayProgramme && !generatingProg ? 'w-72 flex-shrink-0' : 'flex-1'}`}>
-              <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Saved Programmes ({savedProgrammes.length})</h2>
+              <h2 className="ara-section-label">Saved Programmes ({savedProgrammes.length})</h2>
               {loadingProg ? (
                 <p className="text-slate-400 text-sm">Loading…</p>
               ) : savedProgrammes.length === 0 ? (
@@ -391,79 +390,65 @@ export default function LessonPlans() {
         </>
       )}
 
+      </div>{/* end ara-page */}
+
       {/* ── Lesson Plan Generator Modal ── */}
       {showGenerator && (
         <Modal onClose={() => setShowGenerator(false)} title="Generate Lesson Plan" size="lg">
-          <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Class Level</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {CLASS_LEVELS.map(level => (
-                    <button key={level} type="button" onClick={() => setClassLevel(level)}
-                      className={`py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition ${classLevel === level ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-200'}`}>
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Duration</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {DURATIONS.map(d => (
-                    <button key={d} type="button" onClick={() => setDuration(d)}
-                      className={`py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition ${duration === d ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-200'}`}>
-                      {d} min
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Class Level</label>
+            <div className="ara-chip-grid">
+              {CLASS_LEVELS.map(level => (
+                <button key={level} type="button" onClick={() => setClassLevel(level)}
+                  className={`ara-chip${classLevel === level ? ' ara-chip-active' : ''}`}>
+                  {level}
+                </button>
+              ))}
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Skill Focus <span className="text-slate-400 font-normal">(select 1–4)</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {ALL_SKILLS.map(skill => (
-                  <button key={skill} type="button" onClick={() => toggleSkill(skill, selectedSkills, setSelectedSkills)}
-                    className={`py-1.5 px-3 rounded-lg border text-xs font-medium transition ${
-                      selectedSkills.includes(skill) ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : selectedSkills.length >= 4 ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'border-slate-200 text-slate-600 hover:border-blue-200'
-                    }`}>
-                    {skill}
-                  </button>
-                ))}
-              </div>
+          </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Duration</label>
+            <div className="ara-chip-grid">
+              {DURATIONS.map(d => (
+                <button key={d} type="button" onClick={() => setDuration(d)}
+                  className={`ara-chip${duration === d ? ' ara-chip-active' : ''}`}>
+                  {d} min
+                </button>
+              ))}
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Available Equipment</label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {EQUIPMENT_OPTIONS.map(item => (
-                  <button key={item} type="button" onClick={() => toggleEquipment(item, selectedEquipment, setSelectedEquipment)}
-                    className={`py-1.5 px-3 rounded-lg border text-xs font-medium transition text-left ${
-                      selectedEquipment.includes(item) ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-600 hover:border-amber-200'
-                    }`}>
-                    {item}
-                  </button>
-                ))}
-              </div>
-              {selectedEquipment.length > 0 && (
-                <p className="text-xs text-slate-500 mt-2">Selected: {selectedEquipment.join(', ')}</p>
-              )}
+          </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Skill Focus <span className="ara-td-sub">(select 1–4)</span></label>
+            <div className="ara-chip-grid ara-chip-grid-3">
+              {ALL_SKILLS.map(skill => (
+                <button key={skill} type="button" onClick={() => toggleSkill(skill, selectedSkills, setSelectedSkills)}
+                  className={`ara-chip${selectedSkills.includes(skill) ? ' ara-chip-active' : selectedSkills.length >= 4 ? ' ara-chip-disabled' : ''}`}>
+                  {skill}
+                </button>
+              ))}
             </div>
-
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={() => setShowGenerator(false)}
-                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button type="button" onClick={generatePlan}
-                disabled={!classLevel || selectedSkills.length === 0}
-                className="flex-1 px-4 py-2 bg-[#0f172a] hover:bg-[#1e2a45] disabled:bg-slate-300 text-white rounded-lg text-sm font-medium transition">
-                Generate
-              </button>
+          </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Available Equipment</label>
+            <div className="ara-chip-grid ara-chip-grid-3">
+              {EQUIPMENT_OPTIONS.map(item => (
+                <button key={item} type="button" onClick={() => toggleEquipment(item, selectedEquipment, setSelectedEquipment)}
+                  className={`ara-chip ara-chip-amber${selectedEquipment.includes(item) ? ' ara-chip-amber-active' : ''}`}>
+                  {item}
+                </button>
+              ))}
             </div>
+            {selectedEquipment.length > 0 && (
+              <p className="ara-td-sub" style={{ marginTop: 6 }}>Selected: {selectedEquipment.join(', ')}</p>
+            )}
+          </div>
+          <div className="ara-form-footer">
+            <button type="button" onClick={() => setShowGenerator(false)} className="ara-btn ara-btn-secondary">Cancel</button>
+            <button type="button" onClick={generatePlan}
+              disabled={!classLevel || selectedSkills.length === 0}
+              className="ara-btn ara-btn-primary">
+              Generate
+            </button>
           </div>
         </Modal>
       )}
@@ -471,79 +456,63 @@ export default function LessonPlans() {
       {/* ── Programme Generator Modal ── */}
       {showProgGenerator && (
         <Modal onClose={() => setShowProgGenerator(false)} title="Build Multi-Week Programme" size="lg">
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Class Level</label>
-              <div className="grid grid-cols-4 gap-2">
-                {CLASS_LEVELS.map(level => (
-                  <button key={level} type="button" onClick={() => setProgClassLevel(level)}
-                    className={`py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition ${progClassLevel === level ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-200'}`}>
-                    {level}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Number of Weeks</label>
-              <div className="flex items-center gap-2 flex-wrap">
-                {(extendedWeeks ? [13,14,15,16,17,18,19,20,21,22,23,24] : WEEK_PRESETS).map(w => (
-                  <button key={w} type="button" onClick={() => setProgWeeks(w)}
-                    className={`py-2 px-4 rounded-xl border-2 text-sm font-medium transition ${progWeeks === w ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-blue-200'}`}>
-                    {w}
-                  </button>
-                ))}
-                <button type="button" onClick={() => { setExtendedWeeks(!extendedWeeks); setProgWeeks(extendedWeeks ? 6 : 13); }}
-                  className="py-2 px-3 rounded-xl border-2 border-dashed border-slate-300 text-xs text-slate-500 hover:border-slate-400 transition">
-                  {extendedWeeks ? '← Standard' : 'Extended (13–24) →'}
+          <div className="ara-form-group">
+            <label className="ara-form-label">Class Level</label>
+            <div className="ara-chip-grid">
+              {CLASS_LEVELS.map(level => (
+                <button key={level} type="button" onClick={() => setProgClassLevel(level)}
+                  className={`ara-chip${progClassLevel === level ? ' ara-chip-active' : ''}`}>
+                  {level}
                 </button>
-              </div>
-              <p className="text-xs text-slate-400 mt-1.5">Selected: <strong>{progWeeks} weeks</strong></p>
+              ))}
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Skill Focus <span className="text-slate-400 font-normal">(select 1–4)</span>
-              </label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {ALL_SKILLS.map(skill => (
-                  <button key={skill} type="button" onClick={() => toggleSkill(skill, progSkills, setProgSkills)}
-                    className={`py-1.5 px-3 rounded-lg border text-xs font-medium transition ${
-                      progSkills.includes(skill) ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : progSkills.length >= 4 ? 'border-slate-100 text-slate-300 cursor-not-allowed'
-                      : 'border-slate-200 text-slate-600 hover:border-blue-200'
-                    }`}>
-                    {skill}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Available Equipment</label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {EQUIPMENT_OPTIONS.map(item => (
-                  <button key={item} type="button" onClick={() => toggleEquipment(item, progEquipment, setProgEquipment)}
-                    className={`py-1.5 px-3 rounded-lg border text-xs font-medium transition text-left ${
-                      progEquipment.includes(item) ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-600 hover:border-amber-200'
-                    }`}>
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {progError && <p className="text-sm text-red-600">{progError}</p>}
-
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={() => setShowProgGenerator(false)}
-                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button type="button" onClick={generateProgramme}
-                disabled={!progClassLevel || progSkills.length === 0}
-                className="flex-1 px-4 py-2 bg-[#0f172a] hover:bg-[#1e2a45] disabled:bg-slate-300 text-white rounded-lg text-sm font-medium transition">
-                Build Programme
+          </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Number of Weeks</label>
+            <div className="ara-chip-grid">
+              {(extendedWeeks ? [13,14,15,16,17,18,19,20,21,22,23,24] : WEEK_PRESETS).map(w => (
+                <button key={w} type="button" onClick={() => setProgWeeks(w)}
+                  className={`ara-chip${progWeeks === w ? ' ara-chip-active' : ''}`}>
+                  {w}
+                </button>
+              ))}
+              <button type="button" onClick={() => { setExtendedWeeks(!extendedWeeks); setProgWeeks(extendedWeeks ? 6 : 13); }}
+                className="ara-chip ara-chip-dashed">
+                {extendedWeeks ? '← Standard' : 'Extended (13–24) →'}
               </button>
             </div>
+            <p className="ara-td-sub" style={{ marginTop: 4 }}>Selected: <strong>{progWeeks} weeks</strong></p>
+          </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Skill Focus <span className="ara-td-sub">(select 1–4)</span></label>
+            <div className="ara-chip-grid ara-chip-grid-3">
+              {ALL_SKILLS.map(skill => (
+                <button key={skill} type="button" onClick={() => toggleSkill(skill, progSkills, setProgSkills)}
+                  className={`ara-chip${progSkills.includes(skill) ? ' ara-chip-active' : progSkills.length >= 4 ? ' ara-chip-disabled' : ''}`}>
+                  {skill}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="ara-form-group">
+            <label className="ara-form-label">Available Equipment</label>
+            <div className="ara-chip-grid ara-chip-grid-3">
+              {EQUIPMENT_OPTIONS.map(item => (
+                <button key={item} type="button" onClick={() => toggleEquipment(item, progEquipment, setProgEquipment)}
+                  className={`ara-chip ara-chip-amber${progEquipment.includes(item) ? ' ara-chip-amber-active' : ''}`}>
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+          {progError && <div className="ara-error">{progError}</div>}
+          <div className="ara-form-footer">
+            <button type="button" onClick={() => setShowProgGenerator(false)} className="ara-btn ara-btn-secondary">Cancel</button>
+            <button type="button" onClick={generateProgramme}
+              disabled={!progClassLevel || progSkills.length === 0}
+              className="ara-btn ara-btn-primary">
+              Build Programme
+            </button>
           </div>
         </Modal>
       )}

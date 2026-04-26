@@ -191,11 +191,11 @@ export default function MovementBreaks() {
             </div>
             <div className="w-full bg-slate-200 rounded-full h-2 mb-5">
               <div
-                className="bg-green-500 h-2 rounded-full transition-all"
-                style={{ width: `${(breakTimer / ((settings.duration || 2) * 60)) * 100}%` }}
+                className="bg-green-500 h-2 rounded-full transition-all ara-progress-fill"
+                style={{ '--progress': `${(breakTimer / ((settings.duration || 2) * 60)) * 100}%` } as React.CSSProperties}
               />
             </div>
-            <button onClick={dismissBreak}
+            <button type="button" onClick={dismissBreak}
               className="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition">
               Dismiss
             </button>
@@ -203,26 +203,26 @@ export default function MovementBreaks() {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="ara-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Movement Breaks</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Schedule, generate and run classroom movement breaks</p>
+          <h1 className="ara-page-title">Movement Breaks</h1>
+          <p className="ara-page-subtitle">Schedule, generate and run classroom movement breaks</p>
         </div>
         {tab === 'schedule' && canEdit && (
-          <button onClick={handleGenerate} disabled={generating}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition flex items-center gap-2">
-            {generating ? (
-              <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Generating…</>
-            ) : '▶ Generate Schedule'}
-          </button>
+          <div className="ara-page-header-actions">
+            <button type="button" onClick={handleGenerate} disabled={generating} className="ara-btn ara-btn-primary">
+              {generating ? 'Generating…' : '▶ Generate Schedule'}
+            </button>
+          </div>
         )}
       </div>
 
+      <div className="ara-page">
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="ara-tabs">
         {tabs.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key as any)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${tab === t.key ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+          <button key={t.key} type="button" onClick={() => setTab(t.key as any)}
+            className={`ara-tab${tab === t.key ? ' ara-tab-active' : ''}`}>
             <span>{t.icon}</span>{t.label}
           </button>
         ))}
@@ -236,15 +236,15 @@ export default function MovementBreaks() {
             <h3 className="font-semibold text-slate-800 text-sm mb-4">Schedule Settings</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1.5">Age Range</label>
-                <select value={ageRange} onChange={e => setAgeRange(e.target.value)}
+                <label className="block text-xs font-medium text-slate-600 mb-1.5" htmlFor="mb-age-range">Age Range</label>
+                <select id="mb-age-range" value={ageRange} onChange={e => setAgeRange(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
                   {AGE_RANGES.map(a => <option key={a} value={a}>{a} years</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1.5">Mode</label>
-                <select value={mode} onChange={e => setMode(e.target.value as any)}
+                <label className="block text-xs font-medium text-slate-600 mb-1.5" htmlFor="mb-mode">Mode</label>
+                <select id="mb-mode" value={mode} onChange={e => setMode(e.target.value as any)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
                   <option value="random">Random — all breaks generated</option>
                   <option value="mixed">Mixed — teacher picks some, AI fills rest</option>
@@ -260,7 +260,7 @@ export default function MovementBreaks() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-slate-800 text-sm">Break Times</h3>
               {canEdit && (
-                <button onClick={addSlot}
+                <button type="button" onClick={addSlot}
                   className="text-xs bg-green-50 hover:bg-green-100 text-green-700 font-medium px-3 py-1.5 rounded-lg transition">
                   + Add Time
                 </button>
@@ -271,6 +271,7 @@ export default function MovementBreaks() {
                 <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                   <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
                   <select value={slot.time} onChange={e => updateSlot(i, 'time', e.target.value)}
+                    aria-label={`Break time ${i + 1}`}
                     className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
                     {SCHOOL_HOURS.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
@@ -282,7 +283,7 @@ export default function MovementBreaks() {
                     </label>
                   )}
                   {canEdit && slots.length > 1 && (
-                    <button onClick={() => removeSlot(i)}
+                    <button type="button" onClick={() => removeSlot(i)}
                       className="ml-auto text-slate-400 hover:text-red-500 text-xs transition">Remove</button>
                   )}
                 </div>
@@ -344,7 +345,7 @@ export default function MovementBreaks() {
                         </div>
                       </div>
                       {!done && canEdit && (
-                        <button onClick={() => { setActiveBreak(b); setBreakTimer((settings.duration || 2) * 60); }}
+                        <button type="button" onClick={() => { setActiveBreak(b); setBreakTimer((settings.duration || 2) * 60); }}
                           className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg transition">
                           Start
                         </button>
@@ -379,10 +380,10 @@ export default function MovementBreaks() {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Minimum breaks per day</label>
               <div className="flex items-center gap-3">
-                <button onClick={() => setSettings(s => ({ ...s, minBreaks: Math.max(1, s.minBreaks - 1) }))}
+                <button type="button" onClick={() => setSettings(s => ({ ...s, minBreaks: Math.max(1, s.minBreaks - 1) }))}
                   className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-bold transition">−</button>
                 <span className="text-2xl font-bold text-slate-800 w-8 text-center">{settings.minBreaks}</span>
-                <button onClick={() => setSettings(s => ({ ...s, minBreaks: Math.min(10, s.minBreaks + 1) }))}
+                <button type="button" onClick={() => setSettings(s => ({ ...s, minBreaks: Math.min(10, s.minBreaks + 1) }))}
                   className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-bold transition">+</button>
               </div>
               <p className="text-xs text-slate-400 mt-1">Default: 4 — system auto-fills if teacher schedules fewer</p>
@@ -391,25 +392,28 @@ export default function MovementBreaks() {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Break duration (minutes)</label>
               <div className="flex items-center gap-3">
-                <button onClick={() => setSettings(s => ({ ...s, duration: Math.max(1, s.duration - 1) }))}
+                <button type="button" onClick={() => setSettings(s => ({ ...s, duration: Math.max(1, s.duration - 1) }))}
                   className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-bold transition">−</button>
                 <span className="text-2xl font-bold text-slate-800 w-8 text-center">{settings.duration}</span>
-                <button onClick={() => setSettings(s => ({ ...s, duration: Math.min(10, s.duration + 1) }))}
+                <button type="button" onClick={() => setSettings(s => ({ ...s, duration: Math.min(10, s.duration + 1) }))}
                   className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-bold transition">+</button>
               </div>
               <p className="text-xs text-slate-400 mt-1">Default: 2 minutes per break</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <button
+              <button type="button"
+                aria-label="Toggle movement breaks"
+                aria-checked={settings.isEnabled ? 'true' : 'false'}
+                role="switch"
                 onClick={() => setSettings(s => ({ ...s, isEnabled: !s.isEnabled }))}
-                className={`relative w-11 h-6 rounded-full transition-colors ${settings.isEnabled ? 'bg-green-500' : 'bg-slate-300'}`}>
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.isEnabled ? 'translate-x-5' : 'translate-x-0'}`}/>
+                className={`ara-toggle${settings.isEnabled ? ' ara-toggle-on' : ''}`}>
+                <span className="ara-toggle-thumb" />
               </button>
               <span className="text-sm text-slate-700">Movement breaks enabled for all teachers</span>
             </div>
 
-            <button onClick={handleSaveSettings} disabled={savingSettings || !user?.school?.id}
+            <button type="button" onClick={handleSaveSettings} disabled={savingSettings || !user?.school?.id}
               className="w-full py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-semibold rounded-lg transition">
               {savingSettings ? 'Saving…' : 'Save Settings'}
             </button>
@@ -419,6 +423,7 @@ export default function MovementBreaks() {
           </div>
         </div>
       )}
+      </div>{/* end ara-page */}
     </div>
   );
 }

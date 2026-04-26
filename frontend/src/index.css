@@ -1,47 +1,2097 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand blues */
-  --color-navy-950: #0a0f1e;
-  --color-navy-900: #0f172a;
-  --color-navy-800: #1e2a45;
-  --color-navy-700: #243352;
-  --color-navy-600: #2d4068;
+  --color-ara-blue-50:  #EEF6FB;
+  --color-ara-blue-100: #D6E8F3;
+  --color-ara-blue-200: #AED1E6;
+  --color-ara-blue-300: #7FB3D2;
+  --color-ara-blue-400: #5594BA;
+  --color-ara-blue-500: #3A7AA0;
+  --color-ara-blue-600: #2C6286;
+  --color-ara-blue-700: #224E6C;
+  --color-ara-blue-800: #193A51;
+  --color-ara-blue-900: #112838;
 
-  /* Bright blue accent */
-  --color-blue-brand: #2563eb;
-  --color-blue-light: #3b82f6;
+  --color-ara-sage-50:  #F2F5EE;
+  --color-ara-sage-100: #E1EAD5;
+  --color-ara-sage-200: #C3D5AB;
+  --color-ara-sage-500: #628749;
+  --color-ara-sage-600: #4E6C3A;
 
-  /* Role colours */
-  --color-role-admin: #f97316;
-  --color-role-coach: #16a34a;
-  --color-role-teacher: #2563eb;
-  --color-role-principal: #9333ea;
+  --color-ara-sand-50:  #FBF7F0;
+  --color-ara-sand-100: #F5EEE0;
+  --color-ara-sand-200: #EBE0C9;
 
-  /* Earthy accents */
-  --color-earth-500: #78716c;
-  --color-earth-100: #f5f0eb;
+  --color-ara-clay-500: #C4703F;
+  --color-ara-clay-600: #A45A2E;
+
+  --color-ara-ink-900: #0F2433;
+  --color-ara-ink-800: #1C3646;
+  --color-ara-ink-700: #2E4959;
+  --color-ara-ink-500: #607787;
+  --color-ara-ink-400: #8A9BA8;
+  --color-ara-ink-300: #B4C0C9;
+  --color-ara-ink-200: #D6DCE2;
+  --color-ara-ink-100: #E8ECEF;
+  --color-ara-ink-50:  #F4F6F8;
+
+  --color-ara-paper:   #FBF7F0;
+  --color-ara-white:   #FFFFFF;
 }
 
-* {
-  box-sizing: border-box;
+:root {
+  /* Primary palette */
+  --ara-blue-50:  #EEF6FB;
+  --ara-blue-100: #D6E8F3;
+  --ara-blue-200: #AED1E6;
+  --ara-blue-300: #7FB3D2;
+  --ara-blue-400: #5594BA;
+  --ara-blue-500: #3A7AA0;
+  --ara-blue-600: #2C6286;
+  --ara-blue-700: #224E6C;
+  --ara-blue-800: #193A51;
+  --ara-blue-900: #112838;
+
+  --ara-sage-50:  #F2F5EE;
+  --ara-sage-100: #E1EAD5;
+  --ara-sage-200: #C3D5AB;
+  --ara-sage-500: #628749;
+  --ara-sage-600: #4E6C3A;
+
+  --ara-sand-50:  #FBF7F0;
+  --ara-sand-100: #F5EEE0;
+  --ara-sand-200: #EBE0C9;
+
+  --ara-clay-400: #D98A5B;
+  --ara-clay-500: #C4703F;
+  --ara-clay-600: #A45A2E;
+
+  --ara-ink-900: #0F2433;
+  --ara-ink-800: #1C3646;
+  --ara-ink-700: #2E4959;
+  --ara-ink-500: #607787;
+  --ara-ink-400: #8A9BA8;
+  --ara-ink-300: #B4C0C9;
+  --ara-ink-200: #D6DCE2;
+  --ara-ink-100: #E8ECEF;
+  --ara-ink-50:  #F4F6F8;
+
+  --ara-white:  #FFFFFF;
+  --ara-paper:  #FBF7F0;
+
+  --ara-success: #5E8F5A;
+  --ara-warning: #D4A13C;
+  --ara-danger:  #B0543E;
+
+  /* Semantic */
+  --bg:         var(--ara-paper);
+  --bg-elev-1:  var(--ara-white);
+  --bg-elev-2:  var(--ara-white);
+  --bg-muted:   var(--ara-sand-100);
+
+  --fg1:        var(--ara-ink-900);
+  --fg2:        var(--ara-ink-700);
+  --fg3:        var(--ara-ink-500);
+  --fg-muted:   var(--ara-ink-400);
+
+  --brand:       var(--ara-blue-500);
+  --brand-hover: var(--ara-blue-600);
+  --brand-soft:  var(--ara-blue-50);
+  --accent:      var(--ara-clay-500);
+  --accent-soft: #F6E4D5;
+
+  --border:        var(--ara-ink-200);
+  --border-strong: var(--ara-ink-300);
+  --border-brand:  var(--ara-blue-300);
+  --divider:       var(--ara-ink-100);
+
+  /* Typography */
+  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  --font-body:    'Nunito', ui-sans-serif, system-ui, sans-serif;
+
+  /* Radii */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   28px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(28,54,70,0.06);
+  --shadow-sm: 0 2px 6px rgba(28,54,70,0.06), 0 1px 2px rgba(28,54,70,0.04);
+  --shadow-md: 0 8px 20px -4px rgba(28,54,70,0.10), 0 3px 6px rgba(28,54,70,0.05);
+  --shadow-lg: 0 18px 40px -12px rgba(28,54,70,0.14), 0 6px 12px rgba(28,54,70,0.06);
+  --shadow-brand: 0 8px 24px -8px rgba(58,122,160,0.35);
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   360ms;
 }
 
-body {
+* { box-sizing: border-box; }
+
+html, body {
   margin: 0;
-  font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg1);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  width: 100%;
+#root { width: 100%; min-height: 100vh; }
+
+h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ara-ink-200); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ara-ink-300); }
+
+/* Focus rings */
+*:focus-visible {
+  outline: 3px solid var(--ara-blue-300);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── App shell ─────────────────────────────────────────── */
+.ara-app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.ara-main-col {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.ara-impersonation-bar {
+  background: var(--ara-clay-500);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ara-impersonation-bar strong {
+  text-transform: capitalize;
+}
+
+.ara-page-main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.ara-sidebar {
+  width: 240px;
+  background: var(--ara-blue-900);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  overflow: hidden;
+}
+
+.ara-sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ara-sidebar-logo-img {
+  height: 30px;
+  filter: brightness(0) invert(1);
+}
+
+.ara-sidebar-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.ara-sidebar-wordmark-accent {
+  color: var(--ara-blue-300);
+}
+
+.ara-sidebar-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.06em;
+  margin-top: 1px;
+}
+
+.ara-sidebar-dashboard {
+  padding: 12px 12px 4px;
+  flex-shrink: 0;
+}
+
+.ara-sidebar-nav {
+  flex: 1;
+  padding: 4px 12px 8px;
+  overflow-y: auto;
+}
+
+.ara-sidebar-group {
+  margin-bottom: 4px;
+}
+
+.ara-sidebar-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.38);
+}
+
+.ara-sidebar-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ara-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  transition: background 150ms, color 150ms;
+}
+
+.ara-nav-link:hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.9);
+}
+
+.ara-nav-link.active {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-weight: 600;
+}
+
+.ara-sidebar-footer {
+  padding: 14px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.ara-sidebar-profile {
+  background: rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ara-sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.ara-sidebar-profile-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ara-sidebar-profile-role {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 1px;
+}
+
+.ara-signout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  font-family: var(--font-body);
+  transition: color 150ms;
+}
+
+.ara-signout-btn:hover {
+  color: rgba(255,255,255,0.75);
+}
+
+/* ── Shared card ───────────────────────────────────────── */
+.ara-card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.ara-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Pill button ───────────────────────────────────────── */
+.ara-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--dur-base) var(--ease-out);
+  font-size: 14px;
+  padding: 9px 18px;
+  white-space: nowrap;
+}
+
+.ara-btn-primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+
+.ara-btn-primary:hover { background: var(--brand-hover); }
+
+.ara-btn-secondary {
+  background: var(--bg-elev-1);
+  color: var(--fg1);
+  border: 1px solid var(--border-strong);
+}
+
+.ara-btn-secondary:hover { background: var(--ara-ink-50); }
+
+/* ── Page header ───────────────────────────────────────── */
+.ara-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 40px 24px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.ara-page-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ara-page-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg1);
+  margin: 0;
+}
+
+.ara-page-subtitle {
+  font-size: 14px;
+  color: var(--fg3);
+  margin: 4px 0 0;
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.ara-table-header th {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg3);
+  padding: 11px 18px;
+  background: var(--ara-ink-50);
+  border-bottom: 1px solid var(--divider);
+  text-align: left;
+}
+
+/* ── Tag/badge ─────────────────────────────────────────── */
+.ara-tag {
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+/* ── Login page ────────────────────────────────────────── */
+/* ── Login split-panel ─────────────────────────────────── */
+.ara-login-root {
+  display: flex;
+  min-height: 100vh;
+}
+
+.ara-login-left {
+  width: 420px;
+  flex-shrink: 0;
+  background: var(--ara-blue-900);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 40px;
+  color: #fff;
+}
+
+.ara-login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ara-login-logo-img {
+  height: 36px;
+  filter: brightness(0) invert(1);
+}
+
+.ara-login-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.ara-login-wordmark span {
+  color: var(--ara-blue-300);
+}
+
+.ara-login-wordmark-sub {
+  font-size: 11px;
+  opacity: 0.5;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.ara-login-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ara-blue-300);
+  margin-bottom: 16px;
+}
+
+.ara-login-headline {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+
+.ara-login-lede {
+  font-size: 14px;
+  opacity: 0.6;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ara-login-tagline {
+  font-size: 13px;
+  opacity: 0.4;
+  font-style: italic;
+}
+
+.ara-login-right {
+  flex: 1;
+  background: var(--ara-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.ara-login-form-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+
+.ara-login-form-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+
+.ara-login-form-sub {
+  font-size: 14px;
+  color: var(--fg3);
+  margin: 0 0 28px;
+}
+
+.ara-login-error {
+  background: #FDE8E3;
+  border: 1px solid #F4C2B8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--ara-danger);
+  margin-bottom: 20px;
+}
+
+.ara-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ara-login-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 0;
+  margin-top: 4px;
+}
+
+.ara-login-footer {
+  font-size: 13px;
+  color: var(--fg3);
+  margin-top: 24px;
+  text-align: center;
+}
+
+.ara-login-footer a {
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ara-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg2);
+  margin-bottom: 6px;
+}
+
+.ara-field-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--fg1);
+  background: var(--bg-elev-1);
+  box-shadow: var(--shadow-inset);
+  transition: border-color var(--dur-base), box-shadow var(--dur-base);
+  box-sizing: border-box;
+}
+
+.ara-field-input:focus {
+  outline: none;
+  border-color: var(--border-brand);
+  box-shadow: 0 0 0 3px rgba(127,179,210,0.25);
+}
+
+
+/* ── Sidebar avatar (dynamic bg set via style prop) ────── */
+.ara-sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+/* ── Page body ─────────────────────────────────────────── */
+.ara-page {
+  padding: 32px;
+}
+
+/* ── Stats grid ─────────────────────────────────────────── */
+.ara-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ara-stat-card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  text-decoration: none;
+  display: block;
+  transition: box-shadow var(--dur-base), border-color var(--dur-base);
+}
+
+.ara-stat-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-brand);
+}
+
+.ara-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fg3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ara-stat-value {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+  color: var(--fg1);
+  line-height: 1;
+}
+
+.ara-stat-sub {
+  font-size: 12px;
+  color: var(--fg3);
+  margin-top: 4px;
+}
+
+/* ── Table ───────────────────────────────────────────────── */
+.ara-table-wrap {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.ara-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ara-th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg3);
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--ara-ink-50);
+  white-space: nowrap;
+}
+
+.ara-th-center { text-align: center; }
+
+.ara-td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 14px;
+  color: var(--fg2);
+  vertical-align: middle;
+}
+
+.ara-tr:last-child .ara-td { border-bottom: none; }
+
+.ara-tr:hover .ara-td { background: var(--ara-ink-50); }
+
+/* ── Tag variants ────────────────────────────────────────── */
+.ara-tag-brand   { background: var(--brand-soft); color: var(--ara-blue-700); }
+.ara-tag-sage    { background: var(--ara-sage-100); color: var(--ara-sage-600); }
+.ara-tag-sand    { background: var(--ara-sand-100); color: var(--ara-ink-700); }
+.ara-tag-clay    { background: #F4DAD1; color: #7A3323; }
+.ara-tag-neutral { background: var(--ara-ink-100); color: var(--fg2); }
+.ara-tag-success { background: #EBF4EA; color: var(--ara-success); }
+.ara-tag-warning { background: #FEF5E0; color: #7A5A10; }
+.ara-tag-danger  { background: #FCECEB; color: var(--ara-danger); }
+
+/* ── Avatar ──────────────────────────────────────────────── */
+.ara-avatar {
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+}
+.ara-avatar-sm   { width: 28px; height: 28px; font-size: 10px; }
+.ara-avatar-md   { width: 36px; height: 36px; font-size: 13px; }
+.ara-avatar-lg   { width: 52px; height: 52px; font-size: 18px; }
+.ara-avatar-blue    { background: var(--ara-blue-500); }
+.ara-avatar-sage    { background: var(--ara-sage-500); }
+.ara-avatar-clay    { background: var(--ara-clay-500); }
+.ara-avatar-neutral { background: var(--ara-ink-400); }
+
+/* ── Search ──────────────────────────────────────────────── */
+.ara-search {
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--fg1);
+  background: var(--bg-elev-1);
+  transition: border-color var(--dur-base);
+  max-width: 320px;
+  width: 100%;
+}
+.ara-search:focus {
+  outline: none;
+  border-color: var(--border-brand);
+  box-shadow: 0 0 0 3px rgba(127,179,210,0.25);
+}
+
+/* ── Empty / loading states ──────────────────────────────── */
+.ara-empty {
+  padding: 64px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+.ara-loading {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+/* ── Inline error ────────────────────────────────────────── */
+.ara-error {
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: #FCECEB;
+  border: 1px solid #E9B9B0;
+  color: var(--ara-danger);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+/* ── Button extras ───────────────────────────────────────── */
+.ara-btn-danger { background: var(--ara-danger); color: #fff; }
+.ara-btn-danger:hover { background: #8F3F2E; }
+
+/* ── Row actions ─────────────────────────────────────────── */
+.ara-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.ara-row-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg3);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-body);
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.ara-row-action:hover { color: var(--brand); background: var(--brand-soft); }
+.ara-row-action-danger:hover { color: var(--ara-danger); background: #FCECEB; }
+
+/* ── Modal ───────────────────────────────────────────────── */
+.ara-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.ara-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 30, 46, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.ara-modal {
+  position: relative;
+  background: var(--bg-elev-1);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.ara-modal-sm { max-width: 400px; }
+.ara-modal-md { max-width: 520px; }
+.ara-modal-lg { max-width: 672px; }
+.ara-modal-xl { max-width: 900px; }
+
+.ara-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--divider);
+  flex-shrink: 0;
+}
+
+.ara-modal-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg1);
+  margin: 0;
+}
+
+.ara-modal-close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--fg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 1;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.ara-modal-close:hover { background: var(--ara-ink-100); color: var(--fg1); }
+
+.ara-modal-close-float {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.ara-modal-body {
+  padding: 20px 24px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Form fields ─────────────────────────────────────────── */
+.ara-form-group { margin-bottom: 16px; }
+
+.ara-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg2);
+  margin-bottom: 6px;
+}
+
+.ara-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ara-form-footer {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.ara-form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--bg-elev-1);
+  color: var(--fg1);
+  cursor: pointer;
+}
+.ara-form-select:focus {
+  outline: none;
+  border-color: var(--border-brand);
+  box-shadow: 0 0 0 3px rgba(127,179,210,0.25);
+}
+
+/* ── Card header ─────────────────────────────────────────── */
+.ara-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ara-card-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg1);
+  margin: 0;
+}
+
+.ara-card-link {
+  font-size: 13px;
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ara-card-link:hover { text-decoration: underline; }
+
+/* ── Dashboard layout ────────────────────────────────────── */
+.ara-dash-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.ara-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* ── Dashboard booking list ──────────────────────────────── */
+.ara-card-body {
+  padding: 24px;
+}
+
+.ara-booking-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--divider);
+}
+
+.ara-booking-row:first-child {
+  border-top: none;
+}
+
+.ara-booking-date {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  width: 36px;
+  color: var(--brand);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ara-booking-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ara-booking-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ara-booking-sub {
+  font-size: 12px;
+  color: var(--fg3);
+  margin-top: 2px;
+}
+
+.ara-quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ara-quick-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--fg2);
+  text-decoration: none;
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+
+.ara-quick-link:hover {
+  background: var(--brand-soft);
+  border-color: var(--border-brand);
+  color: var(--ara-blue-700);
+}
+
+.ara-quick-link-arrow {
+  color: var(--fg-muted);
+}
+
+/* ── Dashboard attention card ────────────────────────────── */
+.ara-attention-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ara-attention-item {
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.ara-attention-item-sand { background: var(--ara-sand-100); }
+.ara-attention-item-brand { background: var(--brand-soft); }
+
+.ara-attention-label { margin-left: 8px; }
+
+.ara-attention-link { margin-top: 4px; }
+
+/* ── Narrow select ───────────────────────────────────────── */
+.ara-form-select-narrow {
+  max-width: 220px;
+}
+
+/* ── Section label ───────────────────────────────────────── */
+.ara-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg3);
+  margin-bottom: 10px;
+}
+
+/* ── Divider ─────────────────────────────────────────────── */
+.ara-divider {
+  height: 1px;
+  background: var(--divider);
+  border: none;
+  margin: 0;
+}
+
+/* ── Name cell with avatar ───────────────────────────────── */
+.ara-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ara-td-strong {
+  font-weight: 600;
+  color: var(--fg1);
+}
+
+.ara-td-sub {
+  font-size: 12px;
+  color: var(--fg3);
+  margin-top: 1px;
+}
+
+/* ── Pill tabs ───────────────────────────────────────────── */
+.ara-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--ara-ink-100);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  width: fit-content;
+  margin-bottom: 24px;
+}
+
+.ara-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg3);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  transition: background var(--dur-fast), color var(--dur-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ara-tab:hover { color: var(--fg2); }
+
+.ara-tab-active {
+  background: var(--bg-elev-1);
+  color: var(--fg1);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── Filter strip ────────────────────────────────────────── */
+.ara-filter-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ara-filter-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg2);
+  cursor: pointer;
+  background: var(--bg-elev-1);
+  font-family: var(--font-body);
+  transition: all var(--dur-fast);
+  text-transform: capitalize;
+}
+
+.ara-filter-btn:hover { border-color: var(--border-brand); color: var(--brand); }
+
+.ara-filter-btn-active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+/* ── Form footer auto-expand buttons ─────────────────────── */
+.ara-form-footer .ara-btn { flex: 1; justify-content: center; }
+
+/* ── Info block (read-only summary) ─────────────────────── */
+.ara-info-block {
+  background: var(--ara-ink-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--fg2);
+  margin-bottom: 16px;
+}
+
+/* ── Mono code display ───────────────────────────────────── */
+.ara-code {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  background: var(--ara-ink-100);
+  color: var(--fg1);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+}
+
+/* ── Toggle switch ───────────────────────────────────────── */
+.ara-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--ara-ink-300);
+  cursor: pointer;
+  border: none;
+  transition: background var(--dur-base);
+  flex-shrink: 0;
+}
+
+.ara-toggle-on { background: var(--brand); }
+
+.ara-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--dur-base);
+  pointer-events: none;
+}
+
+.ara-toggle-on .ara-toggle-thumb { transform: translateX(20px); }
+
+/* ── FMS score buttons ───────────────────────────────────── */
+.ara-score-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  background: var(--ara-ink-100);
+  color: var(--fg3);
+  transition: all var(--dur-fast);
+}
+
+.ara-score-btn:hover { background: var(--ara-ink-200); }
+
+.ara-score-1 { background: #FCECEB; color: var(--ara-danger); outline: 2px solid var(--ara-danger); outline-offset: 1px; }
+.ara-score-2 { background: #FEF5E0; color: #7A5A10; outline: 2px solid #D4A13C; outline-offset: 1px; }
+.ara-score-3 { background: var(--brand-soft); color: var(--ara-blue-700); outline: 2px solid var(--brand); outline-offset: 1px; }
+.ara-score-4 { background: #EBF4EA; color: var(--ara-success); outline: 2px solid var(--ara-success); outline-offset: 1px; }
+
+/* ── Pending approvals banner ────────────────────────────── */
+.ara-pending-banner {
+  background: #FEF5E0;
+  border: 1px solid #E8C97A;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.ara-pending-banner-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #E8C97A;
+  font-size: 13px;
+  font-weight: 700;
+  color: #7A5A10;
+}
+
+.ara-pending-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ara-warning);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ara-pending-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(232,201,122,0.4);
+}
+
+.ara-pending-row:last-child { border-bottom: none; }
+
+/* ── Tag colour additions ─────────────────────────────────── */
+.ara-tag-clay  { background: #F4DAD1; color: #7A3323; }
+
+/* ── Textarea ─────────────────────────────────────────────── */
+.ara-field-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--fg1);
+  background: var(--bg-elev-1);
+  transition: border-color var(--dur-base), box-shadow var(--dur-base);
+  resize: none;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.ara-field-textarea:focus {
+  outline: none;
+  border-color: var(--border-brand);
+  box-shadow: 0 0 0 3px rgba(127,179,210,0.25);
+}
+
+/* ── Notes display ───────────────────────────────────────── */
+.ara-notes {
+  margin-top: 16px;
+  background: var(--ara-ink-50);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--fg2);
+}
+
+/* ── Confirm / delete modal text ─────────────────────────── */
+.ara-confirm-text {
+  font-size: 14px;
+  color: var(--fg2);
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+/* ── Small icon button ───────────────────────────────────── */
+.ara-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  transition: color var(--dur-fast), background var(--dur-fast);
+  flex-shrink: 0;
+}
+
+.ara-icon-btn:hover { color: var(--brand); background: var(--brand-soft); }
+.ara-icon-btn-warn:hover { color: var(--ara-warning); background: #FEF5E0; }
+.ara-icon-btn-ok  { color: var(--ara-success); }
+
+/* ── Center-aligned td ───────────────────────────────────── */
+.ara-td-center { text-align: center; }
+
+/* ── Toggle + label row ──────────────────────────────────── */
+.ara-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--fg2);
+}
+
+/* ── Screen-reader only ──────────────────────────────────── */
+.ara-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Button size variant ─────────────────────────────────── */
+.ara-btn-sm { font-size: 12px; padding: 5px 12px; }
+
+/* ── Reject button (danger outline) ─────────────────────── */
+.ara-btn-reject { color: var(--ara-danger); border-color: var(--ara-danger); }
+.ara-btn-reject:hover { background: #FCECEB; }
+
+/* ── Inline empty state (inside a table row) ─────────────── */
+.ara-empty-inline { padding: 32px 0; }
+
+/* ── Bordered form footer ────────────────────────────────── */
+.ara-form-footer-bordered {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--divider);
+}
+
+/* ── Pending row layout ──────────────────────────────────── */
+.ara-pending-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ara-pending-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── Permissions editor ──────────────────────────────────── */
+.ara-perm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ara-perm-list {
+  max-height: 42vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ara-perm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast);
+}
+
+.ara-perm-row:hover { background: var(--ara-ink-50); }
+
+.ara-perm-module {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg2);
+  width: 144px;
+  flex-shrink: 0;
+}
+
+.ara-perm-toggles {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ara-perm-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Placement summary cards ─────────────────────────────── */
+.ara-placement-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ara-placement-card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ara-placement-card-info {
+  min-width: 0;
+  flex: 1;
+}
+
+/* ── Truncated table cell ─────────────────────────────────── */
+.ara-td-truncate {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── FMS score row layout ────────────────────────────────── */
+.ara-score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.ara-score-skill {
+  font-size: 13px;
+  color: var(--fg2);
+  width: 148px;
+  flex-shrink: 0;
+}
+
+.ara-score-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.ara-score-label {
+  font-size: 12px;
+  color: var(--fg3);
+  width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Score button active states (inactive stays gray) */
+.ara-score-btn-1.ara-score-btn-active { background: #FCECEB; color: var(--ara-danger); outline: 2px solid var(--ara-danger); outline-offset: 1px; }
+.ara-score-btn-2.ara-score-btn-active { background: #FEF5E0; color: #7A5A10; outline: 2px solid #D4A13C; outline-offset: 1px; }
+.ara-score-btn-3.ara-score-btn-active { background: var(--brand-soft); color: var(--ara-blue-700); outline: 2px solid var(--brand); outline-offset: 1px; }
+.ara-score-btn-4.ara-score-btn-active { background: #EBF4EA; color: var(--ara-success); outline: 2px solid var(--ara-success); outline-offset: 1px; }
+
+/* Score bar (view modal) */
+.ara-score-bar-track {
+  flex: 1;
+  background: var(--ara-ink-100);
+  border-radius: var(--radius-pill);
+  height: 8px;
+  overflow: hidden;
+}
+
+.ara-score-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.ara-score-bar-1 { background: var(--ara-danger); }
+.ara-score-bar-2 { background: var(--ara-warning); }
+.ara-score-bar-3 { background: var(--brand); }
+.ara-score-bar-4 { background: var(--ara-success); }
+
+/* ── Dynamic progress fill (width set via CSS custom property) */
+.ara-progress-fill { width: var(--progress, 0%); }
+
+/* ── FMS seed notice ─────────────────────────────────────── */
+.ara-seed-notice {
+  background: #FEF5E0;
+  border: 1px solid #E8C97A;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.ara-seed-notice-body {
+  padding: 12px 20px;
+}
+
+.ara-code-block {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 12px;
+}
+
+/* ── Chip selector (multi-select button grid) ────────────── */
+.ara-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ara-chip-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.ara-chip {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg2);
+  background: var(--bg-elev-1);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all var(--dur-fast);
+  text-align: left;
+}
+
+.ara-chip:hover { border-color: var(--border-brand); color: var(--brand); }
+
+.ara-chip-active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--ara-blue-700);
+}
+
+.ara-chip-disabled {
+  border-color: var(--divider);
+  color: var(--fg-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ara-chip-amber:hover { border-color: #D4A13C; color: #7A5A10; }
+
+.ara-chip-amber-active {
+  border-color: #D4A13C;
+  background: #FEF5E0;
+  color: #7A5A10;
+}
+
+.ara-chip-dashed {
+  border-style: dashed;
+  border-color: var(--ara-ink-300);
+  font-size: 12px;
+  color: var(--fg3);
+}
+
+/* Score tags (view modal) */
+.ara-score-tag-1 { background: #FCECEB; color: var(--ara-danger); }
+.ara-score-tag-2 { background: #FEF5E0; color: #7A5A10; }
+.ara-score-tag-3 { background: var(--brand-soft); color: var(--ara-blue-700); }
+.ara-score-tag-4 { background: #EBF4EA; color: var(--ara-success); }
+
+/* =====================================================
+   SPLIT-PANEL LAYOUT
+   ===================================================== */
+
+.ara-split-root {
+  display: grid;
+  gap: 20px;
+  padding: 32px;
+  align-items: start;
+}
+
+.ara-split-root-2col { grid-template-columns: 280px 1fr; }
+.ara-split-root-detail { grid-template-columns: 1fr 360px; }
+
+.ara-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ara-panel-card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.ara-panel-card:hover {
+  border-color: var(--border-brand);
+}
+
+.ara-panel-card-active {
+  border-color: var(--brand);
+  border-width: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ara-panel-card-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--fg1);
+}
+
+.ara-panel-card-sub {
+  font-size: 12px;
+  color: var(--fg3);
+  margin-top: 2px;
+}
+
+.ara-panel-card-meta {
+  font-size: 12px;
+  color: var(--fg2);
+  margin-top: 6px;
+}
+
+/* Detail card */
+.ara-detail-card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ara-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.ara-detail-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--fg1);
+}
+
+.ara-detail-subtitle {
+  font-size: 13px;
+  color: var(--fg2);
+  margin-top: 4px;
+}
+
+.ara-detail-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg3);
+  margin-bottom: 12px;
+}
+
+.ara-detail-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ara-detail-info-item {}
+
+.ara-detail-info-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg3);
+  margin-bottom: 2px;
+}
+
+.ara-detail-info-value {
+  font-size: 14px;
+  color: var(--fg1);
+  font-weight: 500;
+}
+
+/* Equipment inventory grid */
+.ara-equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ara-equipment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--ara-ink-50);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.ara-equipment-item-checked {
+  background: var(--ara-sage-50);
+  border-color: var(--ara-sage-200);
+  font-weight: 600;
+}
+
+/* =====================================================
+   SKILL HEATMAP
+   ===================================================== */
+
+.ara-skill-heatmap {}
+
+.ara-skill-category-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg2);
+  margin-bottom: 8px;
+}
+
+.ara-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 0;
+}
+
+.ara-skill-name {
+  width: 160px;
+  font-size: 13px;
+  color: var(--fg1);
+  flex-shrink: 0;
+}
+
+.ara-skill-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--ara-ink-100);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.ara-skill-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.ara-skill-bar-low    { background: var(--ara-clay-400); }
+.ara-skill-bar-mid    { background: var(--brand); }
+.ara-skill-bar-high   { background: var(--ara-sage-500); }
+.ara-skill-bar-none   { background: var(--ara-ink-200); }
+
+.ara-skill-score {
+  width: 44px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  color: var(--fg1);
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   PROGRESS BAR (inline in tables)
+   ===================================================== */
+
+.ara-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ara-progress-track {
+  width: 80px;
+  height: 6px;
+  background: var(--ara-ink-100);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ara-progress-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: var(--radius-pill);
+}
+
+.ara-progress-label {
+  font-size: 12px;
+  color: var(--fg2);
+  white-space: nowrap;
+}
+
+/* =====================================================
+   EMPTY STATE — no selection
+   ===================================================== */
+
+.ara-no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--fg3);
+  font-size: 14px;
+  text-align: center;
+  background: var(--bg-elev-1);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+}
+
+.ara-no-selection-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  opacity: 0.35;
+}
+
+/* Schools split-panel extras */
+.ara-error-padded { margin: 0 32px; }
+.ara-code-row { display: inline-flex; align-items: center; gap: 6px; }
+.ara-equipment-hint { margin-bottom: 12px; }
+.ara-equipment-checkbox { flex-shrink: 0; }
+
+/* =====================================================
+   CLASSES SPLIT LAYOUT
+   ===================================================== */
+
+.ara-classes-split {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  padding: 0 32px 32px;
+}
+
+.ara-classes-detail {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.ara-skill-category {
+  margin-bottom: 18px;
+}
+
+.ara-tr-clickable {
+  cursor: pointer;
+}
+
+.ara-tr-clickable:hover td {
+  background: var(--ara-blue-50);
+}
+
+.ara-tr-selected td {
+  background: var(--ara-blue-50) !important;
+}
+
+/* Skill bar widths (score 0–4 → 0–100%) */
+.ara-skill-bar-w0 { width: 0%; }
+.ara-skill-bar-w1 { width: 25%; }
+.ara-skill-bar-w2 { width: 50%; }
+.ara-skill-bar-w3 { width: 75%; }
+.ara-skill-bar-w4 { width: 100%; }
+
+/* ── Teacher Web Portal ──────────────────────────────────────────────────── */
+.ara-web-portal-root { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+.ara-web-portal-header { margin-bottom: 28px; }
+.ara-portal-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg3); margin-bottom: 6px; }
+.ara-portal-title { font-family: var(--font-display); font-weight: 600; font-size: 40px; letter-spacing: -0.02em; color: var(--fg1); margin: 0 0 8px; }
+.ara-portal-lede { font-size: 17px; color: var(--fg2); max-width: 600px; line-height: 1.55; margin: 0; }
+
+/* Streak bar */
+.ara-streak-bar { display: flex; align-items: center; gap: 24px; background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 28px; flex-wrap: wrap; }
+.ara-streak-flame { display: flex; align-items: center; gap: 6px; }
+.ara-streak-count { font-family: var(--font-display); font-size: 40px; font-weight: 700; color: var(--ara-clay-500); line-height: 1; }
+.ara-streak-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg3); margin-bottom: 8px; }
+.ara-streak-dots { display: flex; gap: 6px; }
+.ara-streak-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--ara-ink-100); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--fg3); }
+.ara-streak-dot-filled { background: var(--ara-clay-500); color: #fff; }
+.ara-streak-stats { display: flex; gap: 24px; margin-left: auto; }
+.ara-streak-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ara-streak-stat-val { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--fg1); line-height: 1; }
+.ara-streak-stat-label { font-size: 11px; color: var(--fg3); font-weight: 500; }
+
+/* Breaks toolbar */
+.ara-breaks-toolbar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; }
+.ara-search-wrap { position: relative; flex: 1 1 280px; max-width: 380px; }
+.ara-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--fg3); pointer-events: none; }
+.ara-search-icon-padded { padding-left: 38px !important; }
+.ara-filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.ara-filter-pill { font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg-elev-1); color: var(--fg2); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.ara-filter-pill-active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.ara-filter-pill:hover:not(.ara-filter-pill-active) { background: var(--bg-elev-2); }
+
+/* Break cards grid */
+.ara-breaks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 900px) { .ara-breaks-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .ara-breaks-grid { grid-template-columns: 1fr; } }
+.ara-break-card { text-align: left; background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; }
+.ara-break-card:hover { box-shadow: var(--shadow-md); border-color: var(--brand); transform: translateY(-2px); }
+.ara-break-card-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--fg1); margin: 12px 0 6px; letter-spacing: -0.01em; }
+.ara-break-card-desc { font-size: 13px; color: var(--fg2); line-height: 1.55; margin: 0 0 16px; }
+.ara-break-card-meta { display: flex; gap: 16px; font-size: 12px; color: var(--fg3); font-weight: 500; border-top: 1px solid var(--divider); padding-top: 12px; }
+.ara-break-card-meta-item { display: inline-flex; align-items: center; gap: 4px; }
+
+/* Break player */
+.ara-break-player { max-width: 680px; margin: 0 auto; padding: 40px 32px; text-align: center; }
+.ara-break-back { background: none; border: none; color: var(--fg2); font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 28px; padding: 0; }
+.ara-break-back:hover { color: var(--fg1); }
+.ara-break-player-cat { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.ara-break-player-age { font-size: 13px; color: var(--fg3); font-weight: 500; }
+.ara-break-player-title { font-family: var(--font-display); font-size: 40px; font-weight: 600; letter-spacing: -0.02em; color: var(--fg1); margin: 0 0 10px; }
+.ara-break-player-desc { font-size: 17px; color: var(--fg2); line-height: 1.55; margin: 0 0 36px; }
+.ara-timer-ring-wrap { position: relative; width: 260px; height: 260px; margin: 0 auto 32px; }
+.ara-timer-svg { transform: rotate(-90deg); display: block; }
+.ara-timer-arc { transition: stroke-dashoffset 1s linear; }
+.ara-timer-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ara-timer-digits { font-family: var(--font-display); font-size: 60px; font-weight: 600; color: var(--fg1); letter-spacing: -0.02em; line-height: 1; }
+.ara-timer-status { font-size: 13px; color: var(--fg3); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+.ara-break-player-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.ara-btn-lg { padding: 14px 28px !important; font-size: 16px !important; }
+.ara-btn-ghost { background: none; border: 1px solid var(--border); color: var(--fg2); border-radius: var(--radius-pill); padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.ara-btn-ghost:hover { background: var(--bg-elev-2); color: var(--fg1); }
+
+/* Congrats modal */
+.ara-congrats-modal { text-align: center; max-width: 420px; padding: 48px 40px !important; }
+.ara-congrats-fireworks { font-size: 48px; margin-bottom: 8px; }
+.ara-congrats-flame { position: relative; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.ara-congrats-streak { position: absolute; font-family: var(--font-display); font-size: 22px; font-weight: 700; color: #fff; }
+.ara-congrats-title { font-family: var(--font-display); font-size: 30px; font-weight: 600; color: var(--fg1); letter-spacing: -0.01em; margin: 0 0 12px; }
+.ara-congrats-body { font-size: 16px; color: var(--fg2); line-height: 1.6; margin: 0 0 28px; }
+.ara-congrats-btn { width: 100%; justify-content: center; }
+
+/* ── Teacher Dashboard ───────────────────────────────────────────────────── */
+.ara-dash-feature-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media (max-width: 768px) { .ara-dash-feature-row { grid-template-columns: 1fr; } }
+
+.ara-featured-break-card { background: linear-gradient(135deg, var(--ara-blue-600, #1a6fb5), var(--ara-blue-800, #0f4a82)); border-radius: var(--radius-lg); padding: 28px; color: #fff; position: relative; overflow: hidden; }
+.ara-featured-break-inner { position: relative; z-index: 1; }
+.ara-featured-break-programme { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.18); border-radius: 999px; padding: 4px 12px; margin-bottom: 12px; }
+.ara-featured-break-title { font-family: var(--font-display); font-size: 30px; font-weight: 600; margin: 12px 0 8px; letter-spacing: -0.01em; }
+.ara-featured-break-desc { font-size: 14px; opacity: 0.88; margin: 0 0 16px; max-width: 380px; line-height: 1.55; }
+.ara-featured-break-meta { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; opacity: 0.75; margin-bottom: 20px; }
+.ara-featured-break-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.ara-featured-break-all { color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 600; text-decoration: none; }
+.ara-featured-break-all:hover { color: #fff; }
+
+.ara-dash-rhythm-card { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+.ara-dash-rhythm-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; margin: 4px 0 20px; }
+.ara-rhythm-stat { margin-bottom: 16px; }
+.ara-rhythm-stat-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.ara-rhythm-stat-label { font-size: 13px; color: var(--fg2); font-weight: 500; white-space: nowrap; }
+.ara-rhythm-stat-val { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--fg1); white-space: nowrap; }
+.ara-rhythm-stat-sub { font-size: 12px; color: var(--fg3); font-weight: 400; }
+.ara-rhythm-bar-track { height: 6px; background: var(--ara-ink-100); border-radius: 999px; overflow: hidden; }
+.ara-rhythm-bar-fill { height: 100%; background: var(--brand); border-radius: 999px; transition: width 0.6s ease; }
+
+.ara-streak-banner { display: flex; align-items: center; gap: 10px; background: var(--ara-clay-50, #fff5f0); border: 1px solid var(--ara-clay-200, #f5c9b3); border-radius: var(--radius-lg); padding: 12px 20px; margin-bottom: 20px; font-size: 14px; color: var(--fg1); }
+.ara-streak-banner-link { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--brand); text-decoration: none; white-space: nowrap; }
+.ara-streak-banner-link:hover { text-decoration: underline; }
+
+.ara-dash-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+@media (max-width: 900px) { .ara-dash-stats-row { grid-template-columns: repeat(2, 1fr); } }
+.ara-dash-stat-card { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+.ara-dash-stat-card-highlight { border-color: var(--brand); background: var(--brand-soft, #eef6fb); }
+.ara-dash-stat-label { font-size: 12px; color: var(--fg3); font-weight: 500; margin-bottom: 6px; }
+.ara-dash-stat-value { font-family: var(--font-display); font-size: 36px; font-weight: 700; color: var(--brand); line-height: 1; }
+.ara-dash-stat-value-sm { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--fg1); line-height: 1.3; }
+
+.ara-dash-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .ara-dash-two-col { grid-template-columns: 1fr; } }
+.ara-simple-list { list-style: none; padding: 0; margin: 0; }
+.ara-simple-list-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--divider); }
+.ara-simple-list-item:last-child { border-bottom: none; }

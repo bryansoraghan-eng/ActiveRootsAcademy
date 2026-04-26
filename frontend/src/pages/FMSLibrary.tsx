@@ -73,36 +73,39 @@ export default function FMSLibrary() {
 
   const parseJson = (str: string) => { try { return JSON.parse(str); } catch { return []; } };
 
-  if (loading) return <div className="p-8 text-slate-400">Loading FMS Library…</div>;
+  if (loading) return <div className="ara-loading">Loading FMS Library…</div>;
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">FMS Knowledge Library</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          {skills.length} Fundamental Movement Skills — Active Roots Academy's expert knowledge base of teaching cues, progressions, and error corrections
-        </p>
+    <div>
+      <div className="ara-page-header">
+        <div>
+          <h1 className="ara-page-title">FMS Knowledge Library</h1>
+          <p className="ara-page-subtitle">
+            {skills.length} Fundamental Movement Skills — Active Roots Academy's expert knowledge base of teaching cues, progressions, and error corrections
+          </p>
+        </div>
       </div>
 
-      {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+      <div className="ara-page">
+      {error && <div className="ara-error">{error}</div>}
 
       {skills.length === 0 && !loading && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
-          <p className="text-amber-800 font-medium mb-2">FMS Library not yet seeded</p>
-          <p className="text-amber-600 text-sm">Run the FMS seed script to populate the knowledge base:</p>
-          <code className="mt-2 block bg-amber-100 rounded px-3 py-2 text-amber-800 text-sm font-mono">
-            cd backend && npx ts-node prisma/seed-fms.ts
-          </code>
+        <div className="ara-seed-notice">
+          <div className="ara-pending-banner-header">FMS Library not yet seeded</div>
+          <div className="ara-seed-notice-body">
+            <p className="ara-td-sub">Run the FMS seed script to populate the knowledge base:</p>
+            <code className="ara-code ara-code-block">
+              cd backend &amp;&amp; npx ts-node prisma/seed-fms.ts
+            </code>
+          </div>
         </div>
       )}
 
       {/* Category filter tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="ara-filter-strip">
         {(['all', 'locomotion', 'object_control', 'stability'] as Category[]).map(cat => (
-          <button key={cat} onClick={() => setCategory(cat)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition capitalize ${
-              category === cat ? 'bg-[#0f172a] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
-            }`}>
+          <button key={cat} type="button" onClick={() => setCategory(cat)}
+            className={`ara-filter-btn${category === cat ? ' ara-filter-btn-active' : ''}`}>
             {cat === 'all' ? `All Skills (${skills.length})` : `${CATEGORY_LABELS[cat]} (${skills.filter(s => s.category === cat).length})`}
           </button>
         ))}
@@ -126,6 +129,7 @@ export default function FMSLibrary() {
                 <div key={skill.id} className={`bg-white rounded-xl border overflow-hidden transition-shadow ${expanded === skill.id ? 'border-blue-200 shadow-md' : 'border-slate-200'}`}>
                   {/* Skill header */}
                   <button
+                    type="button"
                     onClick={() => toggle(skill.id)}
                     className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-slate-50 transition"
                   >
@@ -176,7 +180,7 @@ export default function FMSLibrary() {
                       <div className="px-6 pt-4">
                         <div className="flex gap-1 border-b border-slate-100 mb-4">
                           {(['cues', 'progressions', 'errors'] as const).map(tab => (
-                            <button key={tab} onClick={() => setTab(skill.id, tab)}
+                            <button key={tab} type="button" onClick={() => setTab(skill.id, tab)}
                               className={`px-4 py-2 text-sm font-medium capitalize transition border-b-2 -mb-px ${
                                 getTab(skill.id) === tab
                                   ? 'border-blue-600 text-blue-700'
@@ -268,6 +272,7 @@ export default function FMSLibrary() {
           </div>
         );
       })}
+      </div>{/* end ara-page */}
     </div>
   );
 }

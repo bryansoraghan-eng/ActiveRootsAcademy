@@ -18,6 +18,7 @@ import Nutrition from './pages/Nutrition';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import TeacherClasses from './pages/teacher/TeacherClasses';
 import TeacherAssessments from './pages/teacher/TeacherAssessments';
+import TeacherMovementBreaks from './pages/teacher/TeacherMovementBreaks';
 import TeacherRegister from './pages/TeacherRegister';
 import Register from './pages/Register';
 import Users from './pages/Users';
@@ -48,6 +49,7 @@ function AppRoutes() {
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/teacher/classes" element={<TeacherClasses />} />
           <Route path="/teacher/assessments" element={<TeacherAssessments />} />
+          <Route path="/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
         </Route>
         <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>

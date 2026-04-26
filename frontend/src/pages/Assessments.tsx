@@ -10,12 +10,9 @@ const FMS_SKILLS = [
 ];
 
 const SCORE_LABELS: Record<number, string> = { 1: 'Beginning', 2: 'Developing', 3: 'Achieved', 4: 'Advanced' };
-const SCORE_COLOURS: Record<number, string> = {
-  1: 'bg-red-100 text-red-700',
-  2: 'bg-amber-100 text-amber-700',
-  3: 'bg-blue-100 text-blue-700',
-  4: 'bg-green-100 text-green-700',
-};
+
+const AVG_TAG: (n: number) => string = n =>
+  n >= 3.5 ? 'ara-tag-success' : n >= 2.5 ? 'ara-tag-brand' : n >= 1.5 ? 'ara-tag-warning' : 'ara-tag-danger';
 
 interface Class { id: string; name: string; yearGroup: string; school: { name: string }; }
 interface Coach { id: string; name: string; }
@@ -66,9 +63,7 @@ export default function Assessments() {
         api.get<Class[]>('/classes'),
         api.get<Coach[]>('/coaches'),
       ]);
-      setAssessments(as_);
-      setClasses(cl);
-      setCoaches(co);
+      setAssessments(as_); setClasses(cl); setCoaches(co);
     } catch { setError('Failed to load data'); }
     finally { setLoading(false); }
   };
@@ -92,148 +87,142 @@ export default function Assessments() {
         notes: form.notes || undefined,
         fmsScores: scores,
       });
-      setShowModal(false);
-      load();
+      setShowModal(false); load();
     } catch { setError('Failed to save assessment'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    try {
-      await api.delete(`/assessments/${deleteId}`);
-      setDeleteId(null);
-      load();
-    } catch { setError('Failed to delete assessment'); }
+    try { await api.delete(`/assessments/${deleteId}`); setDeleteId(null); load(); }
+    catch { setError('Failed to delete assessment'); }
   };
 
   const deleteTarget = assessments.find(a => a.id === deleteId);
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div>
+      <div className="ara-page-header">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Assessments</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{assessments.length} FMS assessment{assessments.length !== 1 ? 's' : ''} recorded</p>
+          <h1 className="ara-page-title">Assessments</h1>
+          <p className="ara-page-subtitle">{assessments.length} FMS assessment{assessments.length !== 1 ? 's' : ''} recorded</p>
         </div>
-        <button onClick={openAdd} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-          + New Assessment
-        </button>
+        <div className="ara-page-header-actions">
+          <button type="button" onClick={openAdd} className="ara-btn ara-btn-primary">+ New Assessment</button>
+        </div>
       </div>
 
-      {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+      <div className="ara-page">
+        {error && <div className="ara-error">{error}</div>}
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400">Loading…</div>
+          <div className="ara-table-wrap"><div className="ara-loading">Loading…</div></div>
         ) : assessments.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-xl">📊</div>
-            <p className="text-slate-500 text-sm">No assessments yet — record your first FMS assessment</p>
+          <div className="ara-table-wrap">
+            <div className="ara-empty">No assessments yet — record your first FMS assessment.</div>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Class</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">School</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Coach</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Date</th>
-                <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-6 py-3">Avg Score</th>
-                <th className="px-6 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {assessments.map(a => {
-                const avg = avgScore(a.fmsScores);
-                const avgNum = avg ? parseFloat(avg) : null;
-                return (
-                  <tr key={a.id} className="hover:bg-slate-50 transition cursor-pointer" onClick={() => setViewing(a)}>
-                    <td className="px-6 py-4 font-medium text-slate-800">{a.class.name} <span className="text-slate-400 font-normal text-xs">({a.class.yearGroup})</span></td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{a.class.school.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{a.coach?.name ?? <span className="text-slate-400 italic">Unassigned</span>}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{fmt(a.date)}</td>
-                    <td className="px-6 py-4">
-                      {avgNum ? (
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${SCORE_COLOURS[Math.round(avgNum)]}`}>
-                          {avg} / 4
-                        </span>
-                      ) : <span className="text-slate-400 text-sm">—</span>}
-                    </td>
-                    <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => setViewing(a)} className="text-sm text-slate-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition">View</button>
-                        <button onClick={() => setDeleteId(a.id)} className="text-sm text-slate-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="ara-table-wrap">
+            <table className="ara-table">
+              <thead>
+                <tr>
+                  <th className="ara-th">Class</th>
+                  <th className="ara-th">School</th>
+                  <th className="ara-th">Coach</th>
+                  <th className="ara-th">Date</th>
+                  <th className="ara-th">Avg Score</th>
+                  <th className="ara-th" aria-label="Actions"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {assessments.map(a => {
+                  const avg = avgScore(a.fmsScores);
+                  const avgNum = avg ? parseFloat(avg) : null;
+                  return (
+                    <tr key={a.id} className="ara-tr" style={{ cursor: 'pointer' }} onClick={() => setViewing(a)}>
+                      <td className="ara-td ara-td-strong">
+                        {a.class.name} <span className="ara-td-sub">({a.class.yearGroup})</span>
+                      </td>
+                      <td className="ara-td">{a.class.school.name}</td>
+                      <td className="ara-td">
+                        {a.coach?.name ?? <span className="ara-td-sub">Unassigned</span>}
+                      </td>
+                      <td className="ara-td">{fmt(a.date)}</td>
+                      <td className="ara-td">
+                        {avgNum
+                          ? <span className={`ara-tag ${AVG_TAG(avgNum)}`}>{avg} / 4</span>
+                          : <span className="ara-td-sub">—</span>}
+                      </td>
+                      <td className="ara-td" onClick={e => e.stopPropagation()}>
+                        <div className="ara-row-actions">
+                          <button type="button" className="ara-row-action" onClick={() => setViewing(a)}>View</button>
+                          <button type="button" className="ara-row-action ara-row-action-danger" onClick={() => setDeleteId(a.id)}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* New assessment modal */}
       {showModal && (
-        <Modal onClose={() => setShowModal(false)}>
-          <h2 className="text-lg font-semibold text-slate-800 mb-5">New FMS Assessment</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Class</label>
-                <select required value={form.classId} onChange={e => setForm(f => ({ ...f, classId: e.target.value }))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+        <Modal title="New FMS Assessment" onClose={() => setShowModal(false)} size="lg">
+          <form onSubmit={handleSubmit}>
+            <div className="ara-form-row">
+              <div className="ara-form-group">
+                <label className="ara-form-label" htmlFor="assess-class">Class</label>
+                <select id="assess-class" required value={form.classId}
+                  onChange={e => setForm(f => ({ ...f, classId: e.target.value }))} className="ara-form-select">
                   <option value="">Select class…</option>
                   {classes.map(c => <option key={c.id} value={c.id}>{c.name} — {c.school.name}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Coach <span className="text-slate-400 font-normal">(optional)</span></label>
-                <select value={form.coachId} onChange={e => setForm(f => ({ ...f, coachId: e.target.value }))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <div className="ara-form-group">
+                <label className="ara-form-label" htmlFor="assess-coach">Coach <span className="ara-td-sub">(optional)</span></label>
+                <select id="assess-coach" value={form.coachId}
+                  onChange={e => setForm(f => ({ ...f, coachId: e.target.value }))} className="ara-form-select">
                   <option value="">Unassigned</option>
                   {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-              <input required type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div className="ara-form-group">
+              <label className="ara-form-label" htmlFor="assess-date">Date</label>
+              <input id="assess-date" required type="date" value={form.date}
+                onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="ara-field-input" />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">FMS Scores <span className="text-slate-400 font-normal">(1=Beginning · 2=Developing · 3=Achieved · 4=Advanced)</span></label>
-              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <div className="ara-form-group">
+              <label className="ara-form-label">FMS Scores <span className="ara-td-sub">(1 = Beginning · 2 = Developing · 3 = Achieved · 4 = Advanced)</span></label>
+              <div style={{ maxHeight: 260, overflowY: 'auto', paddingRight: 4 }}>
                 {FMS_SKILLS.map(skill => (
-                  <div key={skill} className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-slate-700 w-36 flex-shrink-0">{skill}</span>
-                    <div className="flex gap-1.5">
+                  <div key={skill} className="ara-score-row">
+                    <span className="ara-score-skill">{skill}</span>
+                    <div className="ara-score-btns">
                       {[1, 2, 3, 4].map(n => (
                         <button key={n} type="button"
                           onClick={() => setScores(s => ({ ...s, [skill]: n }))}
-                          className={`w-8 h-8 rounded-lg text-xs font-semibold transition ${scores[skill] === n ? SCORE_COLOURS[n] + ' ring-2 ring-offset-1 ring-current' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                          className={`ara-score-btn ara-score-btn-${n}${scores[skill] === n ? ' ara-score-btn-active' : ''}`}>
                           {n}
                         </button>
                       ))}
                     </div>
-                    <span className="text-xs text-slate-400 w-20 text-right">{SCORE_LABELS[scores[skill]]}</span>
+                    <span className="ara-score-label">{SCORE_LABELS[scores[skill]]}</span>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notes <span className="text-slate-400 font-normal">(optional)</span></label>
-              <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                placeholder="Any additional observations…" />
+            <div className="ara-form-group">
+              <label className="ara-form-label" htmlFor="assess-notes">Notes <span className="ara-td-sub">(optional)</span></label>
+              <textarea id="assess-notes" value={form.notes} rows={2}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                className="ara-field-textarea" placeholder="Any additional observations…" />
             </div>
-
-            <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button type="submit" disabled={saving} className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-sm font-medium transition">
+            <div className="ara-form-footer">
+              <button type="button" className="ara-btn ara-btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+              <button type="submit" disabled={saving} className="ara-btn ara-btn-primary">
                 {saving ? 'Saving…' : 'Save assessment'}
               </button>
             </div>
@@ -241,42 +230,40 @@ export default function Assessments() {
         </Modal>
       )}
 
-      {/* View scores modal */}
       {viewing && (
-        <Modal onClose={() => setViewing(null)}>
-          <div className="mb-5">
-            <h2 className="text-lg font-semibold text-slate-800">{viewing.class.name} — FMS Scores</h2>
-            <p className="text-sm text-slate-500">{viewing.class.school.name} · {fmt(viewing.date)}{viewing.coach ? ` · ${viewing.coach.name}` : ''}</p>
-          </div>
+        <Modal title={`${viewing.class.name} — FMS Scores`} onClose={() => setViewing(null)} size="lg">
+          <p className="ara-td-sub" style={{ marginBottom: 16 }}>
+            {viewing.class.school.name} · {fmt(viewing.date)}{viewing.coach ? ` · ${viewing.coach.name}` : ''}
+          </p>
           {viewing.fmsScores ? (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {Object.entries(JSON.parse(viewing.fmsScores) as Record<string, number>).map(([skill, score]) => (
-                <div key={skill} className="flex items-center gap-3">
-                  <span className="text-sm text-slate-700 w-36 flex-shrink-0">{skill}</span>
-                  <div className="flex-1 bg-slate-100 rounded-full h-2">
-                    <div className={`h-2 rounded-full transition-all ${score >= 3 ? 'bg-green-500' : score === 2 ? 'bg-amber-400' : 'bg-red-400'}`}
+                <div key={skill} className="ara-score-row">
+                  <span className="ara-score-skill">{skill}</span>
+                  <div className="ara-score-bar-track">
+                    <div className={`ara-score-bar-fill ara-score-bar-${score}`}
                       style={{ width: `${(score / 4) * 100}%` }} />
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium w-20 text-center ${SCORE_COLOURS[score]}`}>{SCORE_LABELS[score]}</span>
+                  <span className={`ara-tag ara-score-tag-${score}`}>{SCORE_LABELS[score]}</span>
                 </div>
               ))}
             </div>
-          ) : <p className="text-slate-400 text-sm">No scores recorded.</p>}
-          {viewing.notes && <p className="mt-4 text-sm text-slate-600 bg-slate-50 rounded-lg p-3">{viewing.notes}</p>}
-          <button onClick={() => setViewing(null)} className="w-full mt-5 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Close</button>
+          ) : <p className="ara-td-sub">No scores recorded.</p>}
+          {viewing.notes && <div className="ara-notes" style={{ marginTop: 16 }}>{viewing.notes}</div>}
+          <div className="ara-form-footer" style={{ marginTop: 20 }}>
+            <button type="button" className="ara-btn ara-btn-secondary" onClick={() => setViewing(null)}>Close</button>
+          </div>
         </Modal>
       )}
 
       {deleteId && (
-        <Modal onClose={() => setDeleteId(null)}>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><span className="text-red-600 text-xl">!</span></div>
-            <h3 className="font-semibold text-slate-800 mb-2">Delete assessment?</h3>
-            <p className="text-slate-500 text-sm mb-6">Assessment for <strong>{deleteTarget?.class.name}</strong> on {deleteTarget ? fmt(deleteTarget.date) : ''} will be permanently deleted.</p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm hover:bg-slate-50 transition">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">Delete</button>
-            </div>
+        <Modal title="Delete assessment?" onClose={() => setDeleteId(null)} size="sm">
+          <p className="ara-confirm-text">
+            Assessment for <strong>{deleteTarget?.class.name}</strong> on {deleteTarget ? fmt(deleteTarget.date) : ''} will be permanently deleted.
+          </p>
+          <div className="ara-form-footer">
+            <button type="button" className="ara-btn ara-btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
+            <button type="button" className="ara-btn ara-btn-danger" onClick={handleDelete}>Delete</button>
           </div>
         </Modal>
       )}

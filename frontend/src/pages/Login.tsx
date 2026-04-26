@@ -7,10 +7,10 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -27,63 +27,73 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Active Roots Academy</h1>
-          <p className="text-blue-300 mt-1">Management Platform</p>
+    <div className="ara-login-root">
+      {/* Left — dark navy */}
+      <div className="ara-login-left">
+        <div className="ara-login-logo">
+          <img src="/logo-mark.svg" alt="" className="ara-login-logo-img" />
+          <div>
+            <div className="ara-login-wordmark">
+              Active <span>Roots</span>
+            </div>
+            <div className="ara-login-wordmark-sub">ACADEMY</div>
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-6">Sign in</h2>
+        <div>
+          <div className="ara-login-eyebrow">HQ Console</div>
+          <h1 className="ara-login-headline">
+            Building strong<br />foundations for<br />the future.
+          </h1>
+          <p className="ara-login-lede">
+            Manage your schools, coaches, classes,<br />and programmes — all in one place.
+          </p>
+        </div>
 
-          {error && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+        <div className="ara-login-tagline">"Start small. Roots take time."</div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Right — warm paper */}
+      <div className="ara-login-right">
+        <div className="ara-login-form-wrap">
+          <h2 className="ara-login-form-title">Sign in</h2>
+          <p className="ara-login-form-sub">Welcome back — enter your details below.</p>
+
+          {error && <div className="ara-login-error">{error}</div>}
+
+          <form className="ara-login-form" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Email
-              </label>
+              <label className="ara-field-label" htmlFor="login-email">Email</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="you@example.com"
+                className="ara-field-input"
+                placeholder="you@school.ie"
               />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Password
-              </label>
+              <label className="ara-field-label" htmlFor="login-password">Password</label>
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="ara-field-input"
                 placeholder="••••••••"
               />
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2.5 rounded-lg transition text-sm"
-            >
+            <button type="submit" disabled={loading} className="ara-btn ara-btn-primary ara-login-submit">
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-5">
+          <p className="ara-login-footer">
             New to the platform?{' '}
-            <Link to="/register" className="text-blue-600 hover:underline font-medium">Create an account</Link>
+            <Link to="/register">Create an account</Link>
           </p>
         </div>
       </div>

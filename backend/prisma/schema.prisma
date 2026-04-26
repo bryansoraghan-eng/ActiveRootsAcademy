@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -294,4 +294,17 @@ model GeneratedProgramme {
   schoolId     String?
   generatedBy  String   @default("ai")
   createdAt    DateTime @default(now())
+}
+
+// ─── Movement Break Completions (streak tracking) ─────────────────────────
+
+model BreakCompletion {
+  id        String   @id @default(cuid())
+  teacherId String
+  date      String   // "YYYY-MM-DD" — one record per teacher per day
+  count     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([teacherId, date])
 }

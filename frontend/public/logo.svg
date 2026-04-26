@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 120" width="560" height="120" role="img" aria-label="Active Roots Academy">
+  
+  <text x="0" y="72" class="wm ink">Active </text>
+  <text x="166" y="72" class="wm blue">Roots</text>
+  <text x="308" y="72" class="wm ink"> Academy</text>
+  
+  <path d="M168 86 Q 220 96 300 86" stroke="#3A7AA0" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+  <path d="M230 82 Q 232 74 238 72 Q 234 78 236 86" fill="#628749" opacity="0.9"></path>
+  <circle cx="246" cy="86" r="2" fill="#628749"></circle>
+</svg>
