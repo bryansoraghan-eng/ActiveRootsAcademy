@@ -19,6 +19,9 @@ interface AuthContextType {
   permissions: Permissions;
   viewingAs: string | null;
   setViewingAs: (role: string | null) => void;
+  impersonateName: string | null;
+  startImpersonation: (name: string, role: string) => void;
+  stopImpersonation: () => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -37,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [userType, setUserType] = useState<'admin' | 'teacher' | null>(null);
   const [viewingAs, setViewingAsState] = useState<string | null>(null);
+  const [impersonateName, setImpersonateNameState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,11 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedUser = localStorage.getItem('ara_user');
     const savedType = localStorage.getItem('ara_userType') as 'admin' | 'teacher' | null;
     const savedViewAs = localStorage.getItem('ara_viewingAs');
+    const savedImpName = localStorage.getItem('ara_impersonateName');
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
       setUserType(savedType);
       if (savedViewAs) setViewingAsState(savedViewAs);
+      if (savedImpName) setImpersonateNameState(savedImpName);
     }
     setIsLoading(false);
   }, []);
@@ -80,10 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setUserType(null);
     setViewingAsState(null);
+    setImpersonateNameState(null);
     localStorage.removeItem('ara_token');
     localStorage.removeItem('ara_user');
     localStorage.removeItem('ara_userType');
     localStorage.removeItem('ara_viewingAs');
+    localStorage.removeItem('ara_impersonateName');
   };
 
   const setViewingAs = (role: string | null) => {
@@ -95,10 +103,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const startImpersonation = (name: string, role: string) => {
+    setImpersonateNameState(name);
+    setViewingAsState(role);
+    localStorage.setItem('ara_impersonateName', name);
+    localStorage.setItem('ara_viewingAs', role);
+  };
+
+  const stopImpersonation = () => {
+    setImpersonateNameState(null);
+    setViewingAsState(null);
+    localStorage.removeItem('ara_impersonateName');
+    localStorage.removeItem('ara_viewingAs');
+  };
+
   const permissions = buildPermissions(user, viewingAs);
 
   return (
-    <AuthContext.Provider value={{ user, token, userType, permissions, viewingAs, setViewingAs, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, userType, permissions, viewingAs, setViewingAs, impersonateName, startImpersonation, stopImpersonation, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

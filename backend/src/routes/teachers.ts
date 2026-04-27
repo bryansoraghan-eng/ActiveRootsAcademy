@@ -69,4 +69,35 @@ router.delete('/:id', authenticate, async (req, res) => {
   }
 });
 
+// GET permissions for a teacher (admin only)
+router.get('/:id/permissions', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: req.params.id },
+      select: { permissions: true },
+    });
+    if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+    res.json(JSON.parse(teacher.permissions || '{}'));
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch permissions' });
+  }
+});
+
+// PUT permissions for a teacher (admin only)
+router.put('/:id/permissions', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  const { permissions } = req.body;
+  try {
+    const teacher = await prisma.teacher.update({
+      where: { id: req.params.id },
+      data: { permissions: JSON.stringify(permissions ?? {}) },
+      select: { id: true, permissions: true },
+    });
+    res.json({ id: teacher.id, permissions: JSON.parse(teacher.permissions) });
+  } catch {
+    res.status(400).json({ error: 'Failed to update permissions' });
+  }
+});
+
 export default router;

@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
+import PermissionsModal from '../components/PermissionsModal';
 
 interface School { id: string; name: string; }
 interface Teacher {
@@ -16,6 +19,9 @@ function initials(name: string) {
 }
 
 export default function Teachers() {
+  const navigate = useNavigate();
+  const { startImpersonation } = useAuth();
+
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [schools, setSchools]   = useState<School[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -26,6 +32,7 @@ export default function Teachers() {
   const [saving, setSaving]     = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch]     = useState('');
+  const [permissionsTarget, setPermissionsTarget] = useState<Teacher | null>(null);
 
   const load = async () => {
     try {
@@ -79,6 +86,18 @@ export default function Teachers() {
       await load();
     } catch (err: any) {
       setError(err.message);
+    }
+  };
+
+  const handleViewDashboard = async (teacher: Teacher) => {
+    try {
+      const data = await api.post<{ id: string; name: string; role: string }>(
+        `/admin/impersonate/${teacher.id}?type=teacher`, {}
+      );
+      startImpersonation(data.name, data.role);
+      navigate('/preview/teacher');
+    } catch {
+      setError('Failed to open dashboard preview');
     }
   };
 
@@ -147,6 +166,20 @@ export default function Teachers() {
                     </td>
                     <td className="ara-td">
                       <div className="ara-row-actions">
+                        <button
+                          type="button"
+                          className="ara-row-action"
+                          onClick={() => handleViewDashboard(teacher)}
+                        >
+                          View Dashboard
+                        </button>
+                        <button
+                          type="button"
+                          className="ara-row-action"
+                          onClick={() => setPermissionsTarget(teacher)}
+                        >
+                          Permissions
+                        </button>
                         <button type="button" className="ara-row-action" onClick={() => openEdit(teacher)}>Edit</button>
                         <button type="button" className="ara-row-action ara-row-action-danger" onClick={() => setDeleteId(teacher.id)}>Delete</button>
                       </div>
@@ -206,6 +239,16 @@ export default function Teachers() {
             <button type="button" className="ara-btn ara-btn-danger" onClick={handleDelete}>Delete</button>
           </div>
         </Modal>
+      )}
+
+      {permissionsTarget && (
+        <PermissionsModal
+          userId={permissionsTarget.id}
+          userType="teacher"
+          role="teacher"
+          name={permissionsTarget.name}
+          onClose={() => setPermissionsTarget(null)}
+        />
       )}
     </div>
   );

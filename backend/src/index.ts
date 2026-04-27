@@ -15,6 +15,7 @@ import teacherRoutes from './routes/teachers';
 import fmsRoutes from './routes/fms';
 import lessonPlanRoutes from './routes/lessonPlans';
 import userRoutes from './routes/users';
+import adminRoutes from './routes/admin';
 import movementBreakSchedulerRoutes from './routes/movementBreakScheduler';
 import breakCompletionsRoutes from './routes/breakCompletions';
 
@@ -45,6 +46,7 @@ app.use('/api/teachers', teacherRoutes);
 app.use('/api/fms', fmsRoutes);
 app.use('/api/lesson-plans', lessonPlanRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/movement-breaks-scheduler', movementBreakSchedulerRoutes);
 app.use('/api/break-completions', breakCompletionsRoutes);
 

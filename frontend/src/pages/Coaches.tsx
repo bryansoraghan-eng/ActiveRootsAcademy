@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
+import PermissionsModal from '../components/PermissionsModal';
 
 interface Coach {
   id: string; name: string; email: string; phone?: string | null;
@@ -27,14 +30,23 @@ function avatarClass(name: string) {
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)}
-      className={`ara-toggle${checked ? ' ara-toggle-on' : ''}`}>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked ? 'true' : 'false'}
+      aria-label={checked ? 'On' : 'Off'}
+      onClick={() => onChange(!checked)}
+      className={`ara-toggle${checked ? ' ara-toggle-on' : ''}`}
+    >
       <span className="ara-toggle-thumb" />
     </button>
   );
 }
 
 export default function Coaches() {
+  const navigate = useNavigate();
+  const { startImpersonation } = useAuth();
+
   const [coaches, setCoaches]   = useState<Coach[]>([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
@@ -44,6 +56,7 @@ export default function Coaches() {
   const [form, setForm]         = useState(empty);
   const [saving, setSaving]     = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [permissionsTarget, setPermissionsTarget] = useState<Coach | null>(null);
 
   const load = async () => {
     try { const data = await api.get<Coach[]>('/coaches'); setCoaches(data); }
@@ -78,6 +91,18 @@ export default function Coaches() {
     if (!deleteId) return;
     try { await api.delete(`/coaches/${deleteId}`); setDeleteId(null); load(); }
     catch { setError('Failed to delete coach'); }
+  };
+
+  const handleViewDashboard = async (coach: Coach) => {
+    try {
+      const data = await api.post<{ id: string; name: string; role: string }>(
+        `/admin/impersonate/${coach.id}?type=coach`, {}
+      );
+      startImpersonation(data.name, data.role);
+      navigate('/');
+    } catch {
+      setError('Failed to open dashboard preview');
+    }
   };
 
   const visible = coaches.filter(c => {
@@ -155,6 +180,20 @@ export default function Coaches() {
                     </td>
                     <td className="ara-td">
                       <div className="ara-row-actions">
+                        <button
+                          type="button"
+                          className="ara-row-action"
+                          onClick={() => handleViewDashboard(c)}
+                        >
+                          View Dashboard
+                        </button>
+                        <button
+                          type="button"
+                          className="ara-row-action"
+                          onClick={() => setPermissionsTarget(c)}
+                        >
+                          Permissions
+                        </button>
                         <button type="button" className="ara-row-action" onClick={() => openEdit(c)}>Edit</button>
                         <button type="button" className="ara-row-action ara-row-action-danger" onClick={() => setDeleteId(c.id)}>Delete</button>
                       </div>
@@ -216,6 +255,16 @@ export default function Coaches() {
             <button type="button" className="ara-btn ara-btn-danger" onClick={handleDelete}>Delete</button>
           </div>
         </Modal>
+      )}
+
+      {permissionsTarget && (
+        <PermissionsModal
+          userId={permissionsTarget.id}
+          userType="coach"
+          role="coach"
+          name={permissionsTarget.name}
+          onClose={() => setPermissionsTarget(null)}
+        />
       )}
     </div>
   );

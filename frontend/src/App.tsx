@@ -73,6 +73,10 @@ function AppRoutes() {
         <Route path="/fms" element={<FMSLibrary />} />
         <Route path="/users" element={<Users />} />
         <Route path="/movement-breaks" element={<MovementBreaks />} />
+        <Route path="/preview/teacher" element={<TeacherDashboard />} />
+        <Route path="/preview/teacher/classes" element={<TeacherClasses />} />
+        <Route path="/preview/teacher/assessments" element={<TeacherAssessments />} />
+        <Route path="/preview/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

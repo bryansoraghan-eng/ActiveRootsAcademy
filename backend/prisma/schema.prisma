@@ -30,27 +30,29 @@ model School {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String
-  name        String
-  role        String   // "admin" | "school_admin" | "teacher" | "coach" | "principal"
-  status      String   @default("active") // "active" | "pending"
-  school      School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
-  schoolId    String?
-  permissions String   @default("{}") // JSON: custom permission overrides per module
-  createdAt   DateTime @default(now())
+  id             String          @id @default(cuid())
+  email          String          @unique
+  password       String
+  name           String
+  role           String          // "admin" | "school_admin" | "teacher" | "coach" | "principal" | "online_coach" | "client"
+  status         String          @default("active") // "active" | "pending"
+  school         School?         @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  schoolId       String?
+  permissions    String          @default("{}") // JSON: custom permission overrides per module
+  coachingClient CoachingClient?
+  createdAt      DateTime        @default(now())
 }
 
 model Teacher {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  schoolId  String
-  classes   Class[]
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  password    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId    String
+  classes     Class[]
+  permissions String   @default("{}")
+  createdAt   DateTime @default(now())
 }
 
 model Class {
@@ -113,6 +115,7 @@ model Coach {
   phone          String?
   specialisation String?
   isPlacement    Boolean      @default(false)
+  permissions    String       @default("{}")
   placements     Placement[]
   bookings       Booking[]
   assessments    Assessment[]
@@ -307,4 +310,200 @@ model BreakCompletion {
   updatedAt DateTime @updatedAt
 
   @@unique([teacherId, date])
+}
+
+// ─── Online Coaching Module ───────────────────────────────────────────────────
+// Roles: online_coach, client (both stored in User table)
+// Fully isolated from school system — no foreign keys to school models
+
+model CoachingClient {
+  id               String                    @id @default(cuid())
+  user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String                    @unique
+  coachId          String                    // User.id where role = 'online_coach'
+  age              Int?
+  startingWeight   Float?
+  height           Float?
+  goals            String?
+  profilePhoto     String?
+  status           String                    @default("active") // "active" | "inactive"
+  startDate        DateTime                  @default(now())
+  trainingPlans    TrainingPlan[]
+  nutritionTargets CoachingNutritionTarget[]
+  nutritionLogs    CoachingNutritionLog[]
+  checkIns         CoachingCheckIn[]
+  progressEntries  CoachingProgressEntry[]
+  clientGoals      CoachingGoal[]
+  sessionLogs      CoachingSessionLog[]
+  exerciseLogs     CoachingExerciseLog[]
+  personalRecords  CoachingPersonalRecord[]
+  createdAt        DateTime                  @default(now())
+}
+
+model TrainingPlan {
+  id          String               @id @default(cuid())
+  client      CoachingClient       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+  coachId     String
+  name        String
+  startDate   DateTime?
+  endDate     DateTime?
+  isActive    Boolean              @default(true)
+  notes       String?
+  days        TrainingDay[]
+  sessionLogs CoachingSessionLog[]
+  goals       CoachingGoal[]
+  createdAt   DateTime             @default(now())
+}
+
+model TrainingDay {
+  id          String               @id @default(cuid())
+  plan        TrainingPlan         @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId      String
+  dayOfWeek   Int                  // 0=Mon 1=Tue 2=Wed 3=Thu 4=Fri 5=Sat 6=Sun
+  name        String
+  notes       String?
+  order       Int                  @default(0)
+  exercises   Exercise[]
+  sessionLogs CoachingSessionLog[]
+  createdAt   DateTime             @default(now())
+}
+
+model Exercise {
+  id           String                @id @default(cuid())
+  day          TrainingDay           @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId        String
+  name         String
+  sets         Int
+  reps         String
+  weight       String?
+  rpe          Int?
+  notes        String?
+  videoUrl     String?
+  order        Int                   @default(0)
+  exerciseLogs CoachingExerciseLog[]
+  createdAt    DateTime              @default(now())
+}
+
+model CoachingSessionLog {
+  id           String                @id @default(cuid())
+  client       CoachingClient        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String
+  plan         TrainingPlan          @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId       String
+  day          TrainingDay           @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  dayId        String
+  startedAt    DateTime              @default(now())
+  completedAt  DateTime?
+  status       String                @default("started") // "started" | "completed"
+  notes        String?
+  exerciseLogs CoachingExerciseLog[]
+  createdAt    DateTime              @default(now())
+}
+
+model CoachingExerciseLog {
+  id         String             @id @default(cuid())
+  session    CoachingSessionLog @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId  String
+  exercise   Exercise           @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exerciseId String
+  client     CoachingClient     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId   String
+  sets       String             // JSON: [{reps: 10, weight: 60}, ...]
+  notes      String?
+  createdAt  DateTime           @default(now())
+}
+
+model CoachingPersonalRecord {
+  id           String         @id @default(cuid())
+  client       CoachingClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String
+  exerciseName String
+  weight       Float
+  reps         Int
+  loggedAt     DateTime       @default(now())
+  createdAt    DateTime       @default(now())
+}
+
+model CoachingNutritionTarget {
+  id            String         @id @default(cuid())
+  client        CoachingClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
+  coachId       String
+  calories      Int
+  protein       Int
+  carbs         Int
+  fats          Int
+  water         Float
+  notes         String?
+  effectiveFrom DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+}
+
+model CoachingNutritionLog {
+  id        String         @id @default(cuid())
+  client    CoachingClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  date      String         // "YYYY-MM-DD"
+  calories  Int            @default(0)
+  protein   Float          @default(0)
+  carbs     Float          @default(0)
+  fats      Float          @default(0)
+  water     Float          @default(0)
+  notes     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([clientId, date])
+}
+
+model CoachingCheckIn {
+  id           String         @id @default(cuid())
+  client       CoachingClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String
+  coachId      String?
+  date         String         // "YYYY-MM-DD"
+  weight       Float?
+  bodyFat      Float?
+  energyLevel  Int?           // 1-10
+  sleepQuality Int?           // 1-10
+  mood         Int?           // 1-10
+  notes        String?
+  photos       String         @default("[]") // JSON array of photo URLs
+  createdAt    DateTime       @default(now())
+}
+
+model CoachingProgressEntry {
+  id        String         @id @default(cuid())
+  client    CoachingClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  date      String         // "YYYY-MM-DD"
+  weight    Float?
+  bodyFat   Float?
+  chest     Float?
+  waist     Float?
+  hips      Float?
+  notes     String?
+  createdAt DateTime       @default(now())
+}
+
+model CoachingGoal {
+  id             String         @id @default(cuid())
+  client         CoachingClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String
+  coachId        String
+  plan           TrainingPlan?  @relation(fields: [trainingPlanId], references: [id], onDelete: SetNull)
+  trainingPlanId String?
+  type           String         // "strength" | "weight" | "nutrition" | "consistency"
+  title          String
+  description    String?
+  startValue     Float
+  targetValue    Float
+  currentValue   Float          @default(0)
+  unit           String
+  deadline       DateTime?
+  status         String         @default("active") // "active" | "completed"
+  completedAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
