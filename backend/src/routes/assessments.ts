@@ -4,12 +4,32 @@ import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
+function adminOnly(req: any, res: any): boolean {
+  if (req.user.role !== 'admin') {
+    res.status(403).json({ error: 'Admin only' });
+    return false;
+  }
+  return true;
+}
+
+function adminOrCoach(req: any, res: any): boolean {
+  if (req.user.role !== 'admin' && req.user.role !== 'coach') {
+    res.status(403).json({ error: 'Admin or coach only' });
+    return false;
+  }
+  return true;
+}
+
 // Get all assessments
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
     const { classId, coachId } = req.query;
+    const schoolFilter = req.user.role !== 'admin' && req.user.schoolId
+      ? { class: { schoolId: req.user.schoolId } }
+      : {};
     const assessments = await prisma.assessment.findMany({
       where: {
+        ...schoolFilter,
         ...(classId ? { classId: classId as string } : {}),
         ...(coachId ? { coachId: coachId as string } : {}),
       },
@@ -27,7 +47,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Create assessment
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: any, res) => {
+  if (!adminOrCoach(req, res)) return;
   try {
     const { classId, coachId, date, notes, fmsScores } = req.body;
     const assessment = await prisma.assessment.create({
@@ -66,7 +87,8 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update assessment
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
+  if (!adminOrCoach(req, res)) return;
   try {
     const { date, notes, fmsScores } = req.body;
     const assessment = await prisma.assessment.update({
@@ -86,7 +108,8 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete assessment
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     await prisma.assessment.delete({ where: { id: req.params.id } });
     res.json({ message: 'Assessment deleted' });

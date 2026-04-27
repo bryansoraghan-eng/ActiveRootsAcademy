@@ -4,14 +4,25 @@ import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
+function adminOnly(req: any, res: any): boolean {
+  if (req.user.role !== 'admin') {
+    res.status(403).json({ error: 'Admin only' });
+    return false;
+  }
+  return true;
+}
+
 // Get all placements
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
     const { coachId, schoolId } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin'
+      ? req.user.schoolId
+      : (schoolId as string | undefined);
     const placements = await prisma.placement.findMany({
       where: {
         ...(coachId ? { coachId: coachId as string } : {}),
-        ...(schoolId ? { schoolId: schoolId as string } : {}),
+        ...(effectiveSchoolId ? { schoolId: effectiveSchoolId } : {}),
       },
       include: { coach: true, school: true },
     });
@@ -23,7 +34,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Create placement
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     const { coachId, schoolId, hours, notes } = req.body;
     const placement = await prisma.placement.create({
@@ -58,7 +70,8 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update placement
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     const { hours, notes } = req.body;
     const placement = await prisma.placement.update({
@@ -74,7 +87,8 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete placement
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     await prisma.placement.delete({ where: { id: req.params.id } });
     res.json({ message: 'Placement deleted' });

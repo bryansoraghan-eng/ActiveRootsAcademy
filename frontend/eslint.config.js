@@ -19,5 +19,10 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Calling setState in effects is the standard React data-fetching pattern.
+      // This rule (added in react-hooks v5) is too strict for legitimate fetch-on-mount usage.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

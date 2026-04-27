@@ -58,6 +58,7 @@ export default function Bookings() {
     finally { setLoading(false); }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const schoolClasses = classes.filter(c => c.schoolId === form.schoolId);

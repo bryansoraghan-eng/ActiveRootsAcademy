@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { can, ROLE_LABELS } from '../lib/permissions';
 import type { ModuleKey } from '../lib/permissions';
@@ -28,8 +28,17 @@ const Ic = {
 
 const ROLE_AVATAR_BG: Record<string, string> = {
   admin: '#C4703F', school_admin: '#628749', principal: '#628749',
-  coach: '#3A7AA0', teacher: '#3A7AA0',
+  coach: '#3A7AA0', teacher: '#3A7AA0', online_coach: '#7C3AED', client: '#7C3AED',
 };
+
+const COACHING_NAV = [
+  { to: '/coaching', label: 'Coach Dashboard', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12 12 3l9 9"/><path d="M5 10v11h14V10"/></svg> },
+  { to: '/coaching/clients', label: 'Clients', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> },
+  { to: '/coaching/training', label: 'Training Plans', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> },
+  { to: '/coaching/nutrition', label: 'Nutrition', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 0v10m0 0l-3-3m3 3l3-3"/></svg> },
+  { to: '/coaching/progress', label: 'Progress', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg> },
+  { to: '/coaching/checkins', label: 'Check-ins', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> },
+];
 
 const NAV_GROUPS: NavGroup[] = [
   { label: 'Operations', key: 'operations', items: [
@@ -55,7 +64,8 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 export default function Sidebar() {
-  const { user, permissions, logout, viewingAs } = useAuth();
+  const { user, permissions, logout, viewingAs, previewUserType } = useAuth();
+  const navigate = useNavigate();
 
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem('ara_sidebar_collapsed') ?? '{}'); }
@@ -95,6 +105,31 @@ export default function Sidebar() {
       </div>
 
       <nav className="ara-sidebar-nav">
+        {user?.role === 'admin' && (
+          <div className="ara-sidebar-group">
+            <button className="ara-sidebar-group-btn" onClick={() => toggleGroup('coaching')}>
+              Online Coaching
+              {Ic.chevron(!collapsed['coaching'])}
+            </button>
+            {!collapsed['coaching'] && (
+              <div className="ara-sidebar-group-items">
+                <button
+                  type="button"
+                  className="ara-nav-link ara-nav-link-coach-portal"
+                  onClick={() => { previewUserType('online_coach'); navigate('/coaching'); }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13 12H3"/></svg>
+                  Enter Coach Portal
+                </button>
+                {COACHING_NAV.map(({ to, label, icon }) => (
+                  <NavLink key={to} to={to} end={to === '/coaching'} className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
+                    {icon}{label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         {NAV_GROUPS.map(group => {
           const visibleItems = group.items.filter(item => can(permissions, item.module));
           if (visibleItems.length === 0) return null;

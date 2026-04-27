@@ -186,8 +186,9 @@ export default function TeacherMovementBreaks() {
       const result = await api.post<StreakData & { milestone: number | null }>('/break-completions', {});
       setStreak(result);
       if (result.milestone) setMilestone(result.milestone);
-    } catch {}
-    finally { setRecording(false); }
+    } catch (e) {
+      console.error('Failed to record break completion:', e);
+    } finally { setRecording(false); }
     setView('library');
     setActive(null);
   };

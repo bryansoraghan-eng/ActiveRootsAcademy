@@ -223,8 +223,10 @@ router.post('/login', async (req, res) => {
       if (user.status === 'pending') {
         return res.status(403).json({ error: 'Your account is pending admin approval. You\'ll receive access once an administrator approves your request.' });
       }
+      const coachingRoles = ['online_coach', 'client'];
+      const userType = coachingRoles.includes(user.role) ? user.role : 'admin';
       const token = jwt.sign(
-        { id: user.id, role: user.role, schoolId: user.schoolId, userType: 'admin' },
+        { id: user.id, role: user.role, schoolId: user.schoolId, userType },
         process.env.JWT_SECRET!,
         { expiresIn: '24h' }
       );
@@ -232,7 +234,7 @@ router.post('/login', async (req, res) => {
       try { customPermissions = JSON.parse(user.permissions || '{}'); } catch {}
       return res.json({
         token,
-        userType: 'admin',
+        userType,
         user: {
           id: user.id, email: user.email, name: user.name,
           role: user.role, school: user.school,

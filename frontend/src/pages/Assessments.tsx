@@ -68,6 +68,7 @@ export default function Assessments() {
     finally { setLoading(false); }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const openAdd = () => {

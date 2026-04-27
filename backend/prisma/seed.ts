@@ -8,7 +8,7 @@ async function main() {
 
   // ── Admin ────────────────────────────────────────────────────────────────
   const adminHash = await bcrypt.hash('Reds1234', 10);
-  await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: { email: 'bryansoraghan@activerootsacademy.com' },
     update: {},
     create: {
@@ -97,6 +97,26 @@ async function main() {
   console.log('Teachers created — all use password: Teacher123');
 
   // ── Coaches ──────────────────────────────────────────────────────────────
+  const coachHash = await bcrypt.hash('Coach123', 10);
+
+  // User accounts (for login)
+  await prisma.user.upsert({
+    where: { email: 'emma@activeroots.ie' },
+    update: {},
+    create: { email: 'emma@activeroots.ie', password: coachHash, name: 'Emma Thompson', role: 'coach' },
+  });
+  await prisma.user.upsert({
+    where: { email: 'liam@activeroots.ie' },
+    update: {},
+    create: { email: 'liam@activeroots.ie', password: coachHash, name: 'Liam Murphy', role: 'coach' },
+  });
+  await prisma.user.upsert({
+    where: { email: 'niamh@activeroots.ie' },
+    update: {},
+    create: { email: 'niamh@activeroots.ie', password: coachHash, name: 'Niamh Kelly', role: 'coach' },
+  });
+
+  // Operational coach records (for bookings/assessments)
   const coach1 = await prisma.coach.upsert({
     where: { email: 'emma@activeroots.ie' },
     update: {},
@@ -132,7 +152,7 @@ async function main() {
       isPlacement: true,
     },
   });
-  console.log('Coaches created');
+  console.log('Coaches created — all use password: Coach123');
 
   // ── Classes ──────────────────────────────────────────────────────────────
   const class1 = await prisma.class.create({
@@ -258,9 +278,158 @@ async function main() {
   });
   console.log('Movement breaks created');
 
+  // ── Admin is also the coach — no separate account needed ─────────────────
+  const onlineCoachUser = adminUser;
+  console.log('Coach linked to admin account — bryansoraghan@activerootsacademy.com / Reds1234');
+
+  // ── Example client ───────────────────────────────────────────────────────
+  const clientHash = await bcrypt.hash('Client123', 10);
+  const clientUser = await prisma.user.upsert({
+    where: { email: 'john.kelly@example.com' },
+    update: {},
+    create: {
+      email: 'john.kelly@example.com',
+      password: clientHash,
+      name: 'John Kelly',
+      role: 'client',
+    },
+  });
+
+  const existingClient = await prisma.coachingClient.findUnique({ where: { userId: clientUser.id } });
+  if (!existingClient) {
+    const client = await prisma.coachingClient.create({
+      data: {
+        userId: clientUser.id,
+        coachId: onlineCoachUser.id,
+        age: 28,
+        startingWeight: 88.5,
+        height: 180,
+        goals: 'Build lean muscle, improve strength on the big lifts, and drop body fat to around 12%. Want to run a 5k without stopping by end of the block.',
+        startDate: new Date('2026-03-01'),
+        status: 'active',
+      },
+    });
+
+    // Training plan
+    const plan = await prisma.trainingPlan.create({
+      data: {
+        clientId: client.id,
+        coachId: onlineCoachUser.id,
+        name: '12-Week Strength Block',
+        notes: 'Progressive overload focusing on compound lifts. 4 days per week upper/lower split.',
+        startDate: new Date('2026-03-03'),
+        isActive: true,
+      },
+    });
+
+    // Day 1 — Upper A
+    const day1 = await prisma.trainingDay.create({
+      data: { planId: plan.id, name: 'Upper A — Push', dayOfWeek: 1, order: 1 },
+    });
+    await prisma.exercise.createMany({
+      data: [
+        { dayId: day1.id, name: 'Barbell Bench Press', sets: 4, reps: '6', weight: '80', rpe: 8, order: 1, notes: 'Full ROM, pause at chest' },
+        { dayId: day1.id, name: 'Overhead Press', sets: 3, reps: '8', weight: '50', rpe: 7, order: 2 },
+        { dayId: day1.id, name: 'Incline Dumbbell Press', sets: 3, reps: '10', weight: '28', rpe: 7, order: 3 },
+        { dayId: day1.id, name: 'Tricep Pushdown', sets: 3, reps: '12', weight: '25', rpe: 6, order: 4 },
+      ],
+    });
+
+    // Day 2 — Lower A
+    const day2 = await prisma.trainingDay.create({
+      data: { planId: plan.id, name: 'Lower A — Squat Focus', dayOfWeek: 3, order: 2 },
+    });
+    await prisma.exercise.createMany({
+      data: [
+        { dayId: day2.id, name: 'Back Squat', sets: 4, reps: '5', weight: '110', rpe: 8, order: 1, notes: 'Hit depth, brace hard' },
+        { dayId: day2.id, name: 'Romanian Deadlift', sets: 3, reps: '10', weight: '80', rpe: 7, order: 2 },
+        { dayId: day2.id, name: 'Leg Press', sets: 3, reps: '12', weight: '160', rpe: 7, order: 3 },
+        { dayId: day2.id, name: 'Calf Raise', sets: 4, reps: '15', weight: '60', rpe: 6, order: 4 },
+      ],
+    });
+
+    // Day 3 — Upper B
+    const day3 = await prisma.trainingDay.create({
+      data: { planId: plan.id, name: 'Upper B — Pull', dayOfWeek: 5, order: 3 },
+    });
+    await prisma.exercise.createMany({
+      data: [
+        { dayId: day3.id, name: 'Deadlift', sets: 3, reps: '5', weight: '140', rpe: 8, order: 1 },
+        { dayId: day3.id, name: 'Barbell Row', sets: 4, reps: '8', weight: '70', rpe: 7, order: 2 },
+        { dayId: day3.id, name: 'Pull-ups', sets: 3, reps: '8', weight: '0', rpe: 7, order: 3, notes: 'Bodyweight, full dead hang' },
+        { dayId: day3.id, name: 'Barbell Curl', sets: 3, reps: '12', weight: '30', rpe: 6, order: 4 },
+      ],
+    });
+
+    // Nutrition targets
+    await prisma.coachingNutritionTarget.create({
+      data: {
+        clientId: client.id,
+        coachId: onlineCoachUser.id,
+        calories: 2600,
+        protein: 190,
+        carbs: 270,
+        fats: 75,
+        water: 3.5,
+        notes: 'High protein to support muscle gain. Carbs timed around training.',
+      },
+    });
+
+    // Check-ins (last 6 weeks)
+    const checkIns = [
+      { daysAgo: 42, weight: 88.5, energy: 6, sleep: 6, mood: 6, notes: 'First week, adjusting to the volume.' },
+      { daysAgo: 35, weight: 88.1, energy: 7, sleep: 7, mood: 7, notes: 'Feeling better. Bench pressing smoother.' },
+      { daysAgo: 28, weight: 87.6, energy: 7, sleep: 7, mood: 8, notes: 'Good week. Hit a new squat PB.' },
+      { daysAgo: 21, weight: 87.2, energy: 8, sleep: 8, mood: 8, notes: 'Energy through the roof. Sleep is great.' },
+      { daysAgo: 14, weight: 86.9, energy: 8, sleep: 7, mood: 8, notes: 'Slight DOMS but loving the progress.' },
+      { daysAgo: 7,  weight: 86.4, energy: 9, sleep: 8, mood: 9, notes: 'Feeling lean and strong. Clothes fitting better.' },
+    ];
+    for (const ci of checkIns) {
+      const d = new Date(); d.setDate(d.getDate() - ci.daysAgo);
+      await prisma.coachingCheckIn.create({
+        data: {
+          clientId: client.id,
+          date: d.toISOString().slice(0, 10),
+          weight: ci.weight,
+          energyLevel: ci.energy,
+          sleepQuality: ci.sleep,
+          mood: ci.mood,
+          notes: ci.notes,
+        },
+      });
+      await prisma.coachingProgressEntry.create({
+        data: { clientId: client.id, weight: ci.weight, date: d.toISOString().slice(0, 10) },
+      });
+    }
+
+    // Personal records
+    await prisma.coachingPersonalRecord.createMany({
+      data: [
+        { clientId: client.id, exerciseName: 'Back Squat', weight: 117.5, reps: 3, loggedAt: new Date(Date.now() - 14 * 86400000) },
+        { clientId: client.id, exerciseName: 'Deadlift', weight: 150, reps: 1, loggedAt: new Date(Date.now() - 21 * 86400000) },
+        { clientId: client.id, exerciseName: 'Barbell Bench Press', weight: 87.5, reps: 3, loggedAt: new Date(Date.now() - 7 * 86400000) },
+      ],
+    });
+
+    // Goals
+    await prisma.coachingGoal.createMany({
+      data: [
+        { clientId: client.id, coachId: onlineCoachUser.id, type: 'strength', title: '120kg Squat', description: 'Hit 120kg for a solid triple', startValue: 100, currentValue: 117.5, targetValue: 120, unit: 'kg', status: 'active', deadline: new Date('2026-06-01') },
+        { clientId: client.id, coachId: onlineCoachUser.id, type: 'weight', title: 'Drop to 84kg', description: 'Reduce bodyweight while keeping strength', startValue: 88.5, currentValue: 86.4, targetValue: 84, unit: 'kg', status: 'active', deadline: new Date('2026-06-01') },
+        { clientId: client.id, coachId: onlineCoachUser.id, type: 'strength', title: '100kg Bench Press', description: 'Three-plate bench', startValue: 80, currentValue: 87.5, targetValue: 100, unit: 'kg', status: 'active', deadline: new Date('2026-07-01') },
+      ],
+    });
+
+    console.log('Example client created — john.kelly@example.com / Client123');
+  } else {
+    console.log('Example client already exists — skipping');
+  }
+
   console.log('\nDone! Login details:');
-  console.log('  Admin:    bryansoraghan@activerootsacademy.com / Reds1234');
-  console.log('  Teachers: sarah@stpatricks.ie / Teacher123  (and conor, aoife, michael)');
+  console.log('  Admin/Coach:  bryansoraghan@activerootsacademy.com / Reds1234');
+  console.log('  Client:       john.kelly@example.com / Client123');
+  console.log('  Teachers:     sarah@stpatricks.ie / Teacher123  (and conor, aoife, michael)');
+  console.log('  Coaches:      emma@activeroots.ie / Coach123  (and liam, niamh)');
   console.log('  School codes: STPAT1 (St Patricks) · SBRID2 (Scoil Bhride)');
 }
 

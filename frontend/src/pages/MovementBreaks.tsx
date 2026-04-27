@@ -76,7 +76,6 @@ export default function MovementBreaks() {
     return () => clearInterval(t);
   }, []);
 
-  // Check for upcoming/current break
   useEffect(() => {
     if (!schedule || activeBreak) return;
     const nowMins = now.getHours() * 60 + now.getMinutes();
@@ -119,7 +118,7 @@ export default function MovementBreaks() {
 
   const removeSlot = (i: number) => setSlots(prev => prev.filter((_, idx) => idx !== i));
 
-  const updateSlot = (i: number, field: keyof BreakSlot, value: any) => {
+  const updateSlot = (i: number, field: keyof BreakSlot, value: string | boolean) => {
     setSlots(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
   };
 
@@ -136,8 +135,8 @@ export default function MovementBreaks() {
       });
       setSchedule(result.generated);
       setTab('live');
-    } catch (e: any) {
-      setGenError(e?.message || 'Failed to generate schedule');
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : 'Failed to generate schedule');
     } finally {
       setGenerating(false);
     }
@@ -148,7 +147,7 @@ export default function MovementBreaks() {
     setSavingSettings(true);
     try {
       await api.put(`/movement-breaks-scheduler/settings/${user.school.id}`, settings);
-    } catch {}
+    } catch { /* settings save errors are surfaced through the disabled button state */ }
     finally { setSavingSettings(false); }
   };
 
@@ -221,7 +220,7 @@ export default function MovementBreaks() {
       {/* Tabs */}
       <div className="ara-tabs">
         {tabs.map(t => (
-          <button key={t.key} type="button" onClick={() => setTab(t.key as any)}
+          <button key={t.key} type="button" onClick={() => setTab(t.key as 'schedule' | 'live' | 'settings')}
             className={`ara-tab${tab === t.key ? ' ara-tab-active' : ''}`}>
             <span>{t.icon}</span>{t.label}
           </button>
@@ -244,7 +243,7 @@ export default function MovementBreaks() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1.5" htmlFor="mb-mode">Mode</label>
-                <select id="mb-mode" value={mode} onChange={e => setMode(e.target.value as any)}
+                <select id="mb-mode" value={mode} onChange={e => setMode(e.target.value as 'random' | 'manual' | 'mixed')}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500">
                   <option value="random">Random — all breaks generated</option>
                   <option value="mixed">Mixed — teacher picks some, AI fills rest</option>

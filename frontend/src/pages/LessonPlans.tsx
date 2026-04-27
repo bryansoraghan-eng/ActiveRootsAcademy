@@ -163,8 +163,8 @@ export default function LessonPlans() {
       setGenerated(result);
       setShowGenerator(false);
       loadPlans();
-    } catch (err: any) {
-      setPlanError(err.message || 'Failed to generate lesson plan');
+    } catch (err) {
+      setPlanError(err instanceof Error ? err.message : 'Failed to generate lesson plan');
     } finally {
       setGenerating(false);
     }
@@ -186,19 +186,19 @@ export default function LessonPlans() {
       setViewingProgramme(null);
       setShowProgGenerator(false);
       loadProgrammes();
-    } catch (err: any) {
-      setProgError(err.message || 'Failed to generate programme');
+    } catch (err) {
+      setProgError(err instanceof Error ? err.message : 'Failed to generate programme');
     } finally {
       setGeneratingProg(false);
     }
   };
 
   const deletePlan = async (id: string) => {
-    try { await api.delete(`/lesson-plans/${id}`); loadPlans(); } catch {}
+    try { await api.delete(`/lesson-plans/${id}`); loadPlans(); } catch { /* deletion errors are non-critical */ }
   };
 
   const deleteProgramme = async (id: string) => {
-    try { await api.delete(`/lesson-plans/programmes/${id}`); loadProgrammes(); } catch {}
+    try { await api.delete(`/lesson-plans/programmes/${id}`); loadProgrammes(); } catch { /* deletion errors are non-critical */ }
   };
 
   const openSavedPlan = (plan: SavedPlan) => {
@@ -262,7 +262,7 @@ export default function LessonPlans() {
           { key: 'plans', label: 'Lesson Plans', icon: '📖' },
           { key: 'programmes', label: 'Programme Builder', icon: '📅' },
         ].map(t => (
-          <button key={t.key} type="button" onClick={() => setMode(t.key as any)}
+          <button key={t.key} type="button" onClick={() => setMode(t.key as 'plans' | 'programmes')}
             className={`ara-tab${mode === t.key ? ' ara-tab-active' : ''}`}>
             <span>{t.icon}</span>{t.label}
           </button>

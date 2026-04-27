@@ -7,6 +7,8 @@ interface School {
   name: string;
 }
 
+const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
+
 export default function TeacherRegister() {
   const navigate = useNavigate();
   const [schools, setSchools] = useState<School[]>([]);
@@ -14,8 +16,6 @@ export default function TeacherRegister() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
   useEffect(() => {
     fetch(`${BASE}/auth/schools`)
@@ -63,8 +63,8 @@ export default function TeacherRegister() {
       }
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setLoading(false);
     }

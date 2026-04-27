@@ -46,6 +46,7 @@ export default function Schools() {
     }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const openAdd = () => { setEditing(null); setForm(empty); setShowModal(true); };
@@ -64,14 +65,14 @@ export default function Schools() {
       else         { await api.post('/schools', form); }
       setShowModal(false);
       await load();
-    } catch (err: any) { setError(err.message); }
+    } catch (err) { setError(err instanceof Error ? err.message : 'Failed to save school'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     try { await api.delete(`/schools/${deleteId}`); setDeleteId(null); await load(); }
-    catch (err: any) { setError(err.message); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Failed to delete school'); }
   };
 
   const handleCopyCode = (id: string, code: string) => {
@@ -84,7 +85,7 @@ export default function Schools() {
     if (!confirm('Generate a new school code? The old code will stop working immediately.')) return;
     setRegeneratingId(id);
     try { await api.post(`/schools/${id}/regenerate-code`, {}); await load(); }
-    catch {}
+    catch { /* regeneration errors are non-critical; user can retry */ }
     finally { setRegeneratingId(null); }
   };
 

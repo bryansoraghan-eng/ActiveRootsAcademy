@@ -4,12 +4,23 @@ import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
+function adminOnly(req: any, res: any): boolean {
+  if (req.user.role !== 'admin') {
+    res.status(403).json({ error: 'Admin only' });
+    return false;
+  }
+  return true;
+}
+
 // Get all classes
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
     const { schoolId } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin'
+      ? req.user.schoolId
+      : (schoolId as string | undefined);
     const classes = await prisma.class.findMany({
-      where: schoolId ? { schoolId: schoolId as string } : {},
+      where: effectiveSchoolId ? { schoolId: effectiveSchoolId } : {},
       include: {
         school: true,
         teacher: true,
@@ -25,7 +36,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Create class
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     const { name, yearGroup, schoolId, teacherId } = req.body;
     const class_ = await prisma.class.create({
@@ -65,7 +77,8 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update class
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     const { name, yearGroup, teacherId } = req.body;
     const class_ = await prisma.class.update({
@@ -85,7 +98,8 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete class
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     await prisma.class.delete({ where: { id: req.params.id } });
     res.json({ message: 'Class deleted' });

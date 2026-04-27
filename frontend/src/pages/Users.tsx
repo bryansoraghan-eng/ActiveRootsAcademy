@@ -11,7 +11,7 @@ interface UserRecord {
   school: School | null; permissions: string; createdAt: string;
 }
 
-const ROLES = ['admin', 'school_admin', 'principal', 'coach', 'teacher'] as const;
+const ROLES = ['admin', 'school_admin', 'principal', 'coach', 'teacher', 'online_coach'] as const;
 
 const ROLE_TAG: Record<string, string> = {
   admin:        'ara-tag-clay',
@@ -19,6 +19,7 @@ const ROLE_TAG: Record<string, string> = {
   principal:    'ara-tag-brand',
   coach:        'ara-tag-sand',
   teacher:      'ara-tag-neutral',
+  online_coach: 'ara-tag-brand',
 };
 
 const ROLE_AVATAR: Record<string, string> = {
@@ -105,19 +106,19 @@ export default function Users() {
       setShowAdd(false);
       setForm({ name: '', email: '', password: '', role: 'teacher', schoolId: '' });
       load();
-    } catch (e: any) { setFormError(e.message); }
+    } catch (e) { setFormError(e instanceof Error ? e.message : 'Failed to create user'); }
     finally { setSaving(false); }
   };
 
   const handleApprove = async (id: string) => {
     setApproving(id);
     try { await api.put(`/users/${id}/approve`, {}); load(); }
-    catch {} finally { setApproving(null); }
+    catch { /* approval errors are non-critical; user can retry */ } finally { setApproving(null); }
   };
 
   const handleReject = async (id: string, name: string) => {
     if (!confirm(`Reject and remove ${name}'s account request?`)) return;
-    try { await api.delete(`/users/${id}/reject`); load(); } catch {}
+    try { await api.delete(`/users/${id}/reject`); load(); } catch { /* rejection errors are non-critical; user can retry */ }
   };
 
   const handleDelete = async (id: string) => {

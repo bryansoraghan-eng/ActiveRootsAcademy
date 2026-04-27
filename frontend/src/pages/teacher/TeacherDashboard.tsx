@@ -20,6 +20,7 @@ interface Class {
 
 interface Booking {
   id: string; status: string; startDate: string; endDate: string;
+  classId?: string;
   programme: { id: string; name: string; type: string };
   class: { name: string };
 }
@@ -61,13 +62,13 @@ export default function TeacherDashboard() {
 
         const myClassIds = new Set(myClasses.map((c: Class) => c.id));
         setRecentAssessments(
-          (allAssessments as any[]).filter((a: Assessment) => myClassIds.has(a.class?.id)).slice(0, 5)
+          allAssessments.filter((a) => myClassIds.has(a.class?.id)).slice(0, 5)
         );
 
         const now = new Date();
         const active = (allBookings as Booking[]).find(b =>
           b.status === 'confirmed' &&
-          myClassIds.has((b as any).classId ?? '') ||
+          myClassIds.has(b.classId ?? '') ||
           myClasses.some(c => c.bookings.some(bk => bk.id === b.id))
         ) ?? null;
 

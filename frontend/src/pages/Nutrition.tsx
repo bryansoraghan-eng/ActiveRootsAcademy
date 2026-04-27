@@ -89,6 +89,7 @@ export default function Nutrition() {
     finally { setLoading(false); }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const toggleMulti = (field: 'preferences' | 'allergies' | 'goals', value: string) => {
@@ -106,8 +107,8 @@ export default function Nutrition() {
     try {
       const result = await api.post<NutritionPlan>('/nutrition/generate', expertForm);
       setPlan(result);
-    } catch (err: any) {
-      setExpertError(err?.message || 'Failed to generate plan. Please try again.');
+    } catch (err) {
+      setExpertError(err instanceof Error ? err.message : 'Failed to generate plan. Please try again.');
     } finally {
       setGenerating(false);
     }

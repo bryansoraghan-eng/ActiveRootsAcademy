@@ -4,13 +4,24 @@ import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
+function adminOnly(req: any, res: any): boolean {
+  if (req.user.role !== 'admin') {
+    res.status(403).json({ error: 'Admin only' });
+    return false;
+  }
+  return true;
+}
+
 // Get all bookings
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
     const { schoolId, classId, status } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin'
+      ? req.user.schoolId
+      : (schoolId as string | undefined);
     const bookings = await prisma.booking.findMany({
       where: {
-        ...(schoolId ? { schoolId: schoolId as string } : {}),
+        ...(effectiveSchoolId ? { schoolId: effectiveSchoolId } : {}),
         ...(classId ? { classId: classId as string } : {}),
         ...(status ? { status: status as string } : {}),
       },
@@ -30,7 +41,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Create booking (book a programme for a class)
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     const { schoolId, classId, programmeId, coachId, startDate, endDate, status } = req.body;
     const booking = await prisma.booking.create({
@@ -78,7 +90,8 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update booking
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     const { coachId, startDate, endDate, status } = req.body;
     const booking = await prisma.booking.update({
@@ -104,7 +117,8 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete booking
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
+  if (!adminOnly(req, res)) return;
   try {
     await prisma.booking.delete({ where: { id: req.params.id } });
     res.json({ message: 'Booking deleted' });

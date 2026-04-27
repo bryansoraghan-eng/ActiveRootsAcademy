@@ -60,6 +60,7 @@ export default function Classes() {
     finally { setLoading(false); }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const openAdd = () => { setEditing(null); setForm(empty); setShowModal(true); };

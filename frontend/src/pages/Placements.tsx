@@ -52,6 +52,7 @@ export default function Placements() {
     finally { setLoading(false); }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const openAdd = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };

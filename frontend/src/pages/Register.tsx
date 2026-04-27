@@ -13,6 +13,8 @@ const SELF_REG_ROLES = [
 
 type Step = 'details' | 'role' | 'school' | 'done';
 
+const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
+
 export default function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('details');
@@ -28,8 +30,6 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ message: string; pending: boolean } | null>(null);
-
-  const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
   useEffect(() => {
     fetch(`${BASE}/auth/schools`)
@@ -116,8 +116,8 @@ export default function Register() {
       if (!res.ok) throw new Error(data.error || 'Registration failed');
       setResult({ message: data.message, pending: !!data.pending });
       setStep('done');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setLoading(false);
     }

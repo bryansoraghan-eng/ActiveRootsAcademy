@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import TeacherLayout from './components/TeacherLayout';
+import CoachingLayout from './components/CoachingLayout';
+import ClientLayout from './components/ClientLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Schools from './pages/Schools';
@@ -23,6 +25,18 @@ import TeacherRegister from './pages/TeacherRegister';
 import Register from './pages/Register';
 import Users from './pages/Users';
 import MovementBreaks from './pages/MovementBreaks';
+import CoachDashboard from './pages/coaching/coach/CoachDashboard';
+import CoachClients from './pages/coaching/coach/CoachClients';
+import CoachTraining from './pages/coaching/coach/CoachTraining';
+import CoachNutrition from './pages/coaching/coach/CoachNutrition';
+import CoachProgress from './pages/coaching/coach/CoachProgress';
+import CoachCheckins from './pages/coaching/coach/CoachCheckins';
+import ClientDashboard from './pages/coaching/client/ClientDashboard';
+import ClientTraining from './pages/coaching/client/ClientTraining';
+import ClientNutrition from './pages/coaching/client/ClientNutrition';
+import ClientProgress from './pages/coaching/client/ClientProgress';
+import ClientCheckins from './pages/coaching/client/ClientCheckins';
+import ClientProfile from './pages/coaching/client/ClientProfile';
 
 function AppRoutes() {
   const { user, userType, isLoading } = useAuth();
@@ -42,6 +56,39 @@ function AppRoutes() {
     );
   }
 
+  if (userType === 'online_coach') {
+    return (
+      <Routes>
+        <Route element={<CoachingLayout />}>
+          <Route path="/coaching" element={<CoachDashboard />} />
+          <Route path="/coaching/clients" element={<CoachClients />} />
+          <Route path="/coaching/clients/:id" element={<CoachClients />} />
+          <Route path="/coaching/training" element={<CoachTraining />} />
+          <Route path="/coaching/nutrition" element={<CoachNutrition />} />
+          <Route path="/coaching/progress" element={<CoachProgress />} />
+          <Route path="/coaching/checkins" element={<CoachCheckins />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/coaching" replace />} />
+      </Routes>
+    );
+  }
+
+  if (userType === 'client') {
+    return (
+      <Routes>
+        <Route element={<ClientLayout />}>
+          <Route path="/client" element={<ClientDashboard />} />
+          <Route path="/client/training" element={<ClientTraining />} />
+          <Route path="/client/nutrition" element={<ClientNutrition />} />
+          <Route path="/client/progress" element={<ClientProgress />} />
+          <Route path="/client/checkins" element={<ClientCheckins />} />
+          <Route path="/client/profile" element={<ClientProfile />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/client" replace />} />
+      </Routes>
+    );
+  }
+
   if (userType === 'teacher') {
     return (
       <Routes>
@@ -49,6 +96,9 @@ function AppRoutes() {
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/teacher/classes" element={<TeacherClasses />} />
           <Route path="/teacher/assessments" element={<TeacherAssessments />} />
+          <Route path="/teacher/nutrition" element={<Nutrition />} />
+          <Route path="/teacher/lesson-plans" element={<LessonPlans />} />
+          <Route path="/teacher/fms" element={<FMSLibrary />} />
           <Route path="/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
         </Route>
         <Route path="*" element={<Navigate to="/teacher" replace />} />
@@ -73,9 +123,14 @@ function AppRoutes() {
         <Route path="/fms" element={<FMSLibrary />} />
         <Route path="/users" element={<Users />} />
         <Route path="/movement-breaks" element={<MovementBreaks />} />
+      </Route>
+      <Route element={<TeacherLayout />}>
         <Route path="/preview/teacher" element={<TeacherDashboard />} />
         <Route path="/preview/teacher/classes" element={<TeacherClasses />} />
         <Route path="/preview/teacher/assessments" element={<TeacherAssessments />} />
+        <Route path="/preview/teacher/nutrition" element={<Nutrition />} />
+        <Route path="/preview/teacher/lesson-plans" element={<LessonPlans />} />
+        <Route path="/preview/teacher/fms" element={<FMSLibrary />} />
         <Route path="/preview/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

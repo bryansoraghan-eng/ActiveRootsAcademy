@@ -122,6 +122,8 @@ export const ROLE_LABELS: Record<string, string> = {
   principal:    'Principal',
   coach:        'Coach',
   teacher:      'Teacher',
+  online_coach: 'Online Coach',
+  client:       'Client',
 };
 
 export const ROLE_COLOURS: Record<string, { bg: string; text: string; dot: string }> = {

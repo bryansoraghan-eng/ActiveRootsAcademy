@@ -86,7 +86,7 @@ export default function PermissionsModal({ userId, userType, role, name, onClose
       ? `/teachers/${userId}/permissions`
       : `/coaches/${userId}/permissions`;
 
-    api.get<Record<string, any>>(endpoint)
+    api.get<Record<string, Record<string, boolean>>>(endpoint)
       .then(overrides => setPerms(resolvePermissions(role, overrides)))
       .catch(() => setPerms(resolvePermissions(role, {})));
   }, [userId, userType, role]);
@@ -96,7 +96,7 @@ export default function PermissionsModal({ userId, userType, role, name, onClose
       if (!prev) return prev;
       const modPerms = { ...prev[mod], [action]: val };
       if (action === 'view' && !val) {
-        Object.keys(modPerms).forEach(k => { (modPerms as any)[k] = false; });
+        Object.keys(modPerms).forEach(k => { (modPerms as Record<string, boolean>)[k] = false; });
       }
       return { ...prev, [mod]: modPerms };
     });

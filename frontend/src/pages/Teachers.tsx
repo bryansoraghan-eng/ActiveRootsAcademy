@@ -49,6 +49,7 @@ export default function Teachers() {
     }
   };
 
+   
   useEffect(() => { load(); }, []);
 
   const openAdd = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
@@ -71,8 +72,8 @@ export default function Teachers() {
       }
       setShowModal(false);
       await load();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save teacher');
     } finally {
       setSaving(false);
     }
@@ -84,8 +85,8 @@ export default function Teachers() {
       await api.delete(`/teachers/${deleteId}`);
       setDeleteId(null);
       await load();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete teacher');
     }
   };
 

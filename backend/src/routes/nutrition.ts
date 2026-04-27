@@ -356,8 +356,36 @@ router.delete('/placement-students/:id', authenticate, async (req, res) => {
 });
 
 // ===== AI NUTRITION EXPERT =====
+
+const VALID_AGE_RANGES = ['4-5', '6-7', '8-9', '10-11', '12+'];
+const VALID_PICKY_LEVELS = ['mild', 'moderate', 'severe'];
+const VALID_PREFERENCES = ['sweet', 'savoury', 'crunchy', 'soft', 'fruity', 'veggie-based', 'vegetarian', 'vegan'];
+const VALID_ALLERGIES = ['nut-free', 'dairy-free', 'gluten-free', 'egg-free', 'soy-free', 'fish-free', 'sesame-free', 'shellfish-free', 'celery-free'];
+const VALID_GOALS = ['energy boost', 'focus & concentration', 'trying new foods', 'healthier snacks', 'balanced diet', 'hydration'];
+
+function sanitizeFreeText(value: unknown, maxLength = 200): string {
+  if (typeof value !== 'string') return '';
+  return value
+    .replace(/[<>{}[\]\\]/g, '')
+    .replace(/\b(ignore|forget|disregard|override|system|prompt|instruction|jailbreak)\b/gi, '')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function allowList(value: unknown, valid: string[]): string[] {
+  if (!Array.isArray(value)) return [];
+  return (value as unknown[]).filter((v): v is string => typeof v === 'string' && valid.includes(v));
+}
+
 router.post('/generate', authenticate, async (req, res) => {
-  const { ageRange, preferences, allergies, pickyEaterLevel, favouriteFoods, goals } = req.body;
+  const raw = req.body;
+
+  const ageRange       = VALID_AGE_RANGES.includes(raw.ageRange) ? raw.ageRange : '';
+  const pickyEaterLevel = VALID_PICKY_LEVELS.includes(raw.pickyEaterLevel) ? raw.pickyEaterLevel : 'mild';
+  const preferences    = allowList(raw.preferences, VALID_PREFERENCES);
+  const allergies      = allowList(raw.allergies, VALID_ALLERGIES);
+  const goals          = allowList(raw.goals, VALID_GOALS);
+  const favouriteFoods = sanitizeFreeText(raw.favouriteFoods);
 
   const hasApiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_api_key_here';
   if (!hasApiKey) {
@@ -366,11 +394,11 @@ router.post('/generate', authenticate, async (req, res) => {
 
   const inputSummary = [
     ageRange ? `Age Range: ${ageRange}` : null,
-    preferences?.length ? `Food Preferences: ${preferences.join(', ')}` : null,
-    allergies?.length ? `Allergies / dietary requirements: ${allergies.join(', ')}` : null,
+    preferences.length ? `Food Preferences: ${preferences.join(', ')}` : null,
+    allergies.length ? `Allergies / dietary requirements: ${allergies.join(', ')}` : null,
     pickyEaterLevel ? `Picky Eater Level: ${pickyEaterLevel}` : null,
     favouriteFoods ? `Favourite Foods: ${favouriteFoods}` : null,
-    goals?.length ? `Goals: ${goals.join(', ')}` : null,
+    goals.length ? `Goals: ${goals.join(', ')}` : null,
   ].filter(Boolean).join('\n');
 
   const systemPrompt = `You are the Active Roots Child Health Expert, specialising in nutrition, hydration, and movement for Irish primary school children aged 4–12.
@@ -458,7 +486,7 @@ Return ONLY valid JSON with this exact structure, no extra text:
 
   if (!plan) {
     try {
-      plan = await buildFallbackNutritionPlan(ageRange, preferences ?? [], allergies ?? [], pickyEaterLevel, favouriteFoods, goals ?? []);
+      plan = await buildFallbackNutritionPlan(ageRange, preferences, allergies, pickyEaterLevel, favouriteFoods, goals);
       source = 'database';
     } catch (dbErr) {
       console.error('Nutrition fallback error:', dbErr);
