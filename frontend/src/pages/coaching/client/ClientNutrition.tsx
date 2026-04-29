@@ -100,7 +100,7 @@ export default function ClientNutrition() {
             <input value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} className="ara-input" style={{ width: '100%' }} placeholder="Optional notes…" />
           </div>
         </div>
-        <button onClick={save} disabled={saving} className="ara-btn ara-btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
+        <button type="button" onClick={save} disabled={saving} className="ara-btn ara-btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
           {saving ? 'Saving…' : today ? 'Update Log' : 'Save Log'}
         </button>
       </div>

@@ -83,7 +83,7 @@ export default function CoachTraining() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="ara-card" style={{ padding: '1rem' }}>
             <label style={{ fontSize: '0.8rem', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '0.5rem' }}>Select Client</label>
-            <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ width: '100%' }}>
+            <select aria-label="Select client" value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ width: '100%' }}>
               <option value="">— choose client —</option>
               {clients.map(c => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
             </select>
@@ -93,17 +93,17 @@ export default function CoachTraining() {
             <div className="ara-card" style={{ padding: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151' }}>Plans</span>
-                <button onClick={() => setShowNewPlan(true)} style={{ fontSize: '0.75rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>+ New</button>
+                <button type="button" onClick={() => setShowNewPlan(true)} style={{ fontSize: '0.75rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>+ New</button>
               </div>
               {showNewPlan && (
                 <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem' }}>
                   <input value={newPlanName} onChange={e => setNewPlanName(e.target.value)} placeholder="Plan name" className="ara-input" style={{ flex: 1, fontSize: '0.8rem' }} />
-                  <button onClick={createPlan} className="ara-btn ara-btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}>Add</button>
+                  <button type="button" onClick={createPlan} className="ara-btn ara-btn-primary" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }}>Add</button>
                 </div>
               )}
               {loading ? <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Loading…</div> :
                 plans.map(plan => (
-                  <button key={plan.id} onClick={() => setSelectedPlan(plan)}
+                  <button type="button" key={plan.id} onClick={() => setSelectedPlan(plan)}
                     style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.5rem 0.625rem', borderRadius: 6, marginBottom: '0.25rem', background: selectedPlan?.id === plan.id ? '#fef3e9' : 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: selectedPlan?.id === plan.id ? 600 : 400, color: selectedPlan?.id === plan.id ? '#C4703F' : '#374151' }}>
                     {plan.name}
                     {plan.isActive && <span style={{ marginLeft: '0.4rem', fontSize: '0.65rem', background: '#dcfce7', color: '#166534', padding: '0.1rem 0.4rem', borderRadius: 999 }}>Active</span>}
@@ -122,18 +122,18 @@ export default function CoachTraining() {
                 <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{selectedPlan.name}</div>
                 <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{selectedPlan.days?.length ?? 0} training days</div>
               </div>
-              <button onClick={() => setShowAddDay(true)} className="ara-btn ara-btn-primary">+ Add Day</button>
+              <button type="button" onClick={() => setShowAddDay(true)} className="ara-btn ara-btn-primary">+ Add Day</button>
             </div>
 
             {showAddDay && (
               <div className="ara-card" style={{ padding: '1rem' }}>
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                   <input value={newDay.name} onChange={e => setNewDay(p => ({ ...p, name: e.target.value }))} placeholder="Day name (e.g. Push Day)" className="ara-input" style={{ flex: 1, minWidth: 160 }} />
-                  <select value={newDay.dayOfWeek} onChange={e => setNewDay(p => ({ ...p, dayOfWeek: parseInt(e.target.value) }))} className="ara-input">
+                  <select aria-label="Day of week" value={newDay.dayOfWeek} onChange={e => setNewDay(p => ({ ...p, dayOfWeek: parseInt(e.target.value) }))} className="ara-input">
                     {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
                   </select>
-                  <button onClick={addDay} className="ara-btn ara-btn-primary">Add</button>
-                  <button onClick={() => setShowAddDay(false)} className="ara-btn ara-btn-ghost">Cancel</button>
+                  <button type="button" onClick={addDay} className="ara-btn ara-btn-primary">Add</button>
+                  <button type="button" onClick={() => setShowAddDay(false)} className="ara-btn ara-btn-ghost">Cancel</button>
                 </div>
               </div>
             )}
@@ -145,7 +145,7 @@ export default function CoachTraining() {
                     <span style={{ fontWeight: 600 }}>{day.name}</span>
                     <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#94a3b8' }}>{DAYS[day.dayOfWeek]}</span>
                   </div>
-                  <button onClick={() => setShowAddEx(day.id)} style={{ fontSize: '0.8rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>+ Exercise</button>
+                  <button type="button" onClick={() => setShowAddEx(day.id)} style={{ fontSize: '0.8rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>+ Exercise</button>
                 </div>
 
                 {showAddEx === day.id && (
@@ -159,8 +159,8 @@ export default function CoachTraining() {
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                       <input value={newEx.rpe} onChange={e => setNewEx(p => ({ ...p, rpe: e.target.value }))} placeholder="RPE (1-10)" className="ara-input" style={{ width: 100 }} type="number" min="1" max="10" />
                       <input value={newEx.notes} onChange={e => setNewEx(p => ({ ...p, notes: e.target.value }))} placeholder="Notes" className="ara-input" style={{ flex: 1 }} />
-                      <button onClick={() => addExercise(day.id)} className="ara-btn ara-btn-primary">Add</button>
-                      <button onClick={() => setShowAddEx(null)} className="ara-btn ara-btn-ghost">Cancel</button>
+                      <button type="button" onClick={() => addExercise(day.id)} className="ara-btn ara-btn-primary">Add</button>
+                      <button type="button" onClick={() => setShowAddEx(null)} className="ara-btn ara-btn-ghost">Cancel</button>
                     </div>
                   </div>
                 )}
@@ -180,7 +180,7 @@ export default function CoachTraining() {
                             </div>
                           </div>
                         </div>
-                        <button onClick={() => deleteExercise(day.id, ex.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>Remove</button>
+                        <button type="button" onClick={() => deleteExercise(day.id, ex.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}>Remove</button>
                       </div>
                     ))
                   )}

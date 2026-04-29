@@ -42,7 +42,7 @@ export default function CoachCheckins() {
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ maxWidth: 280 }}>
+        <select aria-label="Select client" value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ maxWidth: 280 }}>
           <option value="">— choose client —</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
         </select>
@@ -76,14 +76,14 @@ export default function CoachCheckins() {
                   <div>
                     <textarea value={noteText} onChange={e => setNoteText(e.target.value)} className="ara-input" rows={3} style={{ width: '100%', resize: 'vertical', marginBottom: '0.5rem' }} placeholder="Leave a note for the client…" />
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button onClick={() => saveNote(ci.id)} className="ara-btn ara-btn-primary" style={{ fontSize: '0.8rem' }}>Save Note</button>
-                      <button onClick={() => { setEditingNote(null); setNoteText(''); }} className="ara-btn ara-btn-ghost" style={{ fontSize: '0.8rem' }}>Cancel</button>
+                      <button type="button" onClick={() => saveNote(ci.id)} className="ara-btn ara-btn-primary" style={{ fontSize: '0.8rem' }}>Save Note</button>
+                      <button type="button" onClick={() => { setEditingNote(null); setNoteText(''); }} className="ara-btn ara-btn-ghost" style={{ fontSize: '0.8rem' }}>Cancel</button>
                     </div>
                   </div>
                 ) : (
                   <div>
                     {ci.notes && <div style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem', background: '#fef3e9', padding: '0.5rem 0.75rem', borderRadius: 6 }}>{ci.notes}</div>}
-                    <button onClick={() => { setEditingNote(ci.id); setNoteText(ci.notes ?? ''); }} style={{ fontSize: '0.8rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <button type="button" onClick={() => { setEditingNote(ci.id); setNoteText(ci.notes ?? ''); }} style={{ fontSize: '0.8rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>
                       {ci.notes ? 'Edit note' : '+ Add note'}
                     </button>
                   </div>

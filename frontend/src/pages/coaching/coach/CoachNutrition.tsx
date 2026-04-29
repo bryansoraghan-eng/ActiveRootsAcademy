@@ -56,7 +56,7 @@ export default function CoachNutrition() {
 
       <div style={{ marginBottom: '1.5rem' }}>
         <label style={{ fontSize: '0.8rem', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '0.4rem' }}>Select Client</label>
-        <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ maxWidth: 280 }}>
+        <select aria-label="Select client" value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ maxWidth: 280 }}>
           <option value="">— choose client —</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
         </select>
@@ -92,7 +92,7 @@ export default function CoachNutrition() {
                 <input value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} className="ara-input" style={{ width: '100%' }} />
               </div>
             </div>
-            <button onClick={saveTarget} disabled={saving} className="ara-btn ara-btn-primary" style={{ marginTop: '0.75rem', width: '100%' }}>
+            <button type="button" onClick={saveTarget} disabled={saving} className="ara-btn ara-btn-primary" style={{ marginTop: '0.75rem', width: '100%' }}>
               {saving ? 'Saving…' : 'Set Targets'}
             </button>
           </div>

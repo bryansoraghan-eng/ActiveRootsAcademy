@@ -42,8 +42,9 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
             { key: 'height', label: 'Height (cm)', type: 'number', required: false },
           ].map(f => (
             <div key={f.key}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '0.25rem' }}>{f.label}{f.required && ' *'}</label>
+              <label htmlFor={f.key} style={{ fontSize: '0.8rem', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '0.25rem' }}>{f.label}{f.required && ' *'}</label>
               <input
+                id={f.key}
                 type={f.type}
                 value={(form as Record<string, string>)[f.key]}
                 onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
@@ -53,13 +54,13 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
             </div>
           ))}
           <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '0.25rem' }}>Goals</label>
-            <textarea value={form.goals} onChange={e => setForm(p => ({ ...p, goals: e.target.value }))} className="ara-input" rows={3} style={{ width: '100%', resize: 'vertical' }} />
+            <label htmlFor="goals" style={{ fontSize: '0.8rem', fontWeight: 500, color: '#374151', display: 'block', marginBottom: '0.25rem' }}>Goals</label>
+            <textarea id="goals" value={form.goals} onChange={e => setForm(p => ({ ...p, goals: e.target.value }))} className="ara-input" rows={3} style={{ width: '100%', resize: 'vertical' }} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem', justifyContent: 'flex-end' }}>
-          <button onClick={onClose} className="ara-btn ara-btn-ghost">Cancel</button>
-          <button onClick={save} disabled={saving} className="ara-btn ara-btn-primary">{saving ? 'Saving…' : 'Create Client'}</button>
+          <button type="button" onClick={onClose} className="ara-btn ara-btn-ghost">Cancel</button>
+          <button type="button" onClick={save} disabled={saving} className="ara-btn ara-btn-primary">{saving ? 'Saving…' : 'Create Client'}</button>
         </div>
       </div>
     </div>
@@ -87,7 +88,7 @@ export default function CoachClients() {
           <h1 className="ara-page-title">Clients</h1>
           <p className="ara-page-sub">{clients.length} client{clients.length !== 1 ? 's' : ''}</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="ara-btn ara-btn-primary">+ Add Client</button>
+        <button type="button" onClick={() => setShowCreate(true)} className="ara-btn ara-btn-primary">+ Add Client</button>
       </div>
 
       {showCreate && <CreateClientModal onClose={() => setShowCreate(false)} onCreated={load} />}

@@ -87,7 +87,7 @@ export default function CoachProgress() {
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ maxWidth: 280 }}>
+        <select aria-label="Select client" value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="ara-input" style={{ maxWidth: 280 }}>
           <option value="">— choose client —</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.user?.name}</option>)}
         </select>
@@ -99,7 +99,7 @@ export default function CoachProgress() {
           <div className="ara-card">
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 700 }}>Goals</span>
-              <button onClick={() => setShowGoalForm(v => !v)} className="ara-btn ara-btn-primary" style={{ fontSize: '0.8rem' }}>+ New Goal</button>
+              <button type="button" onClick={() => setShowGoalForm(v => !v)} className="ara-btn ara-btn-primary" style={{ fontSize: '0.8rem' }}>+ New Goal</button>
             </div>
 
             {showGoalForm && (
@@ -116,7 +116,7 @@ export default function CoachProgress() {
                     <div key={f.key}>
                       <label style={{ fontSize: '0.75rem', color: '#374151', display: 'block', marginBottom: '0.2rem' }}>{f.label}</label>
                       {f.type === 'select' ? (
-                        <select value={goalForm[f.key as keyof typeof goalForm]} onChange={e => setGoalForm(p => ({ ...p, [f.key]: e.target.value }))} className="ara-input" style={{ width: '100%' }}>
+                        <select aria-label={f.label} value={goalForm[f.key as keyof typeof goalForm]} onChange={e => setGoalForm(p => ({ ...p, [f.key]: e.target.value }))} className="ara-input" style={{ width: '100%' }}>
                           {f.options!.map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
                       ) : (
@@ -126,8 +126,8 @@ export default function CoachProgress() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-                  <button onClick={createGoal} className="ara-btn ara-btn-primary">Create Goal</button>
-                  <button onClick={() => setShowGoalForm(false)} className="ara-btn ara-btn-ghost">Cancel</button>
+                  <button type="button" onClick={createGoal} className="ara-btn ara-btn-primary">Create Goal</button>
+                  <button type="button" onClick={() => setShowGoalForm(false)} className="ara-btn ara-btn-ghost">Cancel</button>
                 </div>
               </div>
             )}
@@ -155,11 +155,11 @@ export default function CoachProgress() {
                         updatingGoal === goal.id ? (
                           <div style={{ display: 'flex', gap: '0.4rem' }}>
                             <input type="number" value={newGoalValue} onChange={e => setNewGoalValue(e.target.value)} className="ara-input" style={{ width: 80, fontSize: '0.75rem', padding: '0.2rem 0.4rem' }} placeholder="New value" />
-                            <button onClick={() => updateGoalProgress(goal.id)} style={{ fontSize: '0.7rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>Save</button>
-                            <button onClick={() => { setUpdatingGoal(null); setNewGoalValue(''); }} style={{ fontSize: '0.7rem', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
+                            <button type="button" onClick={() => updateGoalProgress(goal.id)} style={{ fontSize: '0.7rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>Save</button>
+                            <button type="button" onClick={() => { setUpdatingGoal(null); setNewGoalValue(''); }} style={{ fontSize: '0.7rem', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
                           </div>
                         ) : (
-                          <button onClick={() => setUpdatingGoal(goal.id)} style={{ fontSize: '0.7rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>Update progress</button>
+                          <button type="button" onClick={() => setUpdatingGoal(goal.id)} style={{ fontSize: '0.7rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>Update progress</button>
                         )
                       )}
                     </div>

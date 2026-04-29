@@ -114,7 +114,7 @@ export default function ClientCheckins() {
           <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} className="ara-input" rows={3} style={{ width: '100%', resize: 'vertical' }} placeholder="How are you feeling? Any observations…" />
         </div>
 
-        <button onClick={save} disabled={saving} className="ara-btn ara-btn-primary" style={{ width: '100%' }}>
+        <button type="button" onClick={save} disabled={saving} className="ara-btn ara-btn-primary" style={{ width: '100%' }}>
           {saving ? 'Saving…' : 'Submit Check-in'}
         </button>
       </div>

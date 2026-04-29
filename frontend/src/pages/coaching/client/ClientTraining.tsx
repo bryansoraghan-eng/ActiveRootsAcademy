@@ -79,7 +79,7 @@ export default function ClientTraining() {
       <div className="ara-page-header">
         <h1 className="ara-page-title">Training</h1>
         {activeSession && (
-          <button onClick={completeSession} disabled={completing} className="ara-btn ara-btn-primary" style={{ background: '#22c55e' }}>
+          <button type="button" onClick={completeSession} disabled={completing} className="ara-btn ara-btn-primary" style={{ background: '#22c55e' }}>
             {completing ? 'Saving…' : '✓ Complete Session'}
           </button>
         )}
@@ -94,7 +94,7 @@ export default function ClientTraining() {
       {plans.length > 1 && (
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           {plans.map(p => (
-            <button key={p.id} onClick={() => setSelectedPlan(p)}
+            <button type="button" key={p.id} onClick={() => setSelectedPlan(p)}
               style={{ padding: '0.4rem 0.875rem', borderRadius: 999, border: 'none', cursor: 'pointer', background: selectedPlan?.id === p.id ? '#C4703F' : '#f1f5f9', color: selectedPlan?.id === p.id ? '#fff' : '#374151', fontWeight: selectedPlan?.id === p.id ? 600 : 400, fontSize: '0.875rem' }}>
               {p.name}
             </button>

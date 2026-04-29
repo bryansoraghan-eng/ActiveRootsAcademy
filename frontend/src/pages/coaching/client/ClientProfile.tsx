@@ -39,7 +39,7 @@ export default function ClientProfile() {
     <div className="ara-page">
       <div className="ara-page-header">
         <h1 className="ara-page-title">Profile</h1>
-        {!editing && <button onClick={() => setEditing(true)} className="ara-btn ara-btn-ghost">Edit</button>}
+        {!editing && <button type="button" onClick={() => setEditing(true)} className="ara-btn ara-btn-ghost">Edit</button>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
@@ -107,8 +107,8 @@ export default function ClientProfile() {
 
       {editing && (
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-          <button onClick={() => setEditing(false)} className="ara-btn ara-btn-ghost">Cancel</button>
-          <button onClick={save} disabled={saving} className="ara-btn ara-btn-primary">{saving ? 'Saving…' : 'Save Changes'}</button>
+          <button type="button" onClick={() => setEditing(false)} className="ara-btn ara-btn-ghost">Cancel</button>
+          <button type="button" onClick={save} disabled={saving} className="ara-btn ara-btn-primary">{saving ? 'Saving…' : 'Save Changes'}</button>
         </div>
       )}
     </div>
