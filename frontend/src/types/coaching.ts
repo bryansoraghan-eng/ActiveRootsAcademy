@@ -4,6 +4,7 @@ export interface CoachingClient {
   startDate?: string;
   user?: { name: string; email: string };
   clientGoals?: CoachingGoal[];
+  trainingPlans?: unknown[];
 }
 
 export interface NutritionTarget {
@@ -25,6 +26,7 @@ export interface NutritionLog {
   carbs?: number;
   fats?: number;
   water?: number;
+  notes?: string;
 }
 
 export interface ProgressEntry {
@@ -55,6 +57,16 @@ export interface CoachingGoal {
   deadline?: string;
 }
 
+export interface CheckIn {
+  id: string;
+  date: string;
+  weight?: number;
+  energyLevel?: number;
+  sleepQuality?: number;
+  mood?: number;
+  notes?: string;
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -78,6 +90,7 @@ export interface TrainingDay {
 export interface TrainingPlan {
   id: string;
   name: string;
+  isActive?: boolean;
   notes?: string;
   days?: TrainingDay[];
 }

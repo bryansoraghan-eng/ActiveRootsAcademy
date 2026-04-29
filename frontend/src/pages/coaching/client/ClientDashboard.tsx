@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import type { CoachingGoal } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
 export default function ClientDashboard() {
   const { token, user, previewClientId } = useAuth();
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
-  const [goals, setGoals] = useState<Record<string, unknown>[]>([]);
+  const [goals, setGoals] = useState<CoachingGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const cq = previewClientId ? `?clientId=${previewClientId}` : '';
 
@@ -18,8 +19,8 @@ export default function ClientDashboard() {
     ]).then(([p, g]) => { setProfile(p); setGoals(g); }).finally(() => setLoading(false));
   }, [token, cq]);
 
-  const activePlan = profile?.trainingPlans?.[0];
-  const target = profile?.nutritionTargets?.[0];
+  const activePlan = (profile?.trainingPlans as Record<string, unknown>[] | undefined)?.[0] as Record<string, unknown> | undefined;
+  const target = (profile?.nutritionTargets as Record<string, unknown>[] | undefined)?.[0] as Record<string, unknown> | undefined;
 
   if (loading) return <div className="ara-page" style={{ color: '#94a3b8' }}>Loading…</div>;
 

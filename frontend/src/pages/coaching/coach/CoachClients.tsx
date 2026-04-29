@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import type { CoachingClient } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
@@ -68,7 +69,7 @@ function CreateClientModal({ onClose, onCreated }: { onClose: () => void; onCrea
 export default function CoachClients() {
   const { token, previewUserType } = useAuth();
   const navigate = useNavigate();
-  const [clients, setClients] = useState<Record<string, unknown>[]>([]);
+  const [clients, setClients] = useState<CoachingClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
 

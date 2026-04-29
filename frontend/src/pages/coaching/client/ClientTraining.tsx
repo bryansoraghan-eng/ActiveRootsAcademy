@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import type { TrainingPlan } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function ClientTraining() {
   const { token, previewClientId } = useAuth();
-  const [plans, setPlans] = useState<Record<string, unknown>[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<Record<string, unknown> | null>(null);
-  const [activeSession, setActiveSession] = useState<Record<string, unknown> | null>(null);
+  const [plans, setPlans] = useState<TrainingPlan[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
+  const [activeSession, setActiveSession] = useState<{ id: string; dayId: string } | null>(null);
   const [logs, setLogs] = useState<Record<string, { sets: { reps: number; weight: number }[] }>>({});
   const [prAlert, setPrAlert] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +104,7 @@ export default function ClientTraining() {
 
       {selectedPlan && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {((selectedPlan.days ?? []) as Record<string, unknown>[]).map((day) => {
+          {(selectedPlan.days ?? []).map((day) => {
             const isActiveDay = activeSession?.dayId === day.id;
             return (
               <div key={day.id} className="ara-card">
@@ -113,13 +114,13 @@ export default function ClientTraining() {
                     <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: '#94a3b8' }}>{DAYS[day.dayOfWeek]}</span>
                   </div>
                   {!activeSession ? (
-                    <button onClick={() => startSession(selectedPlan.id, day.id)} className="ara-btn ara-btn-primary" style={{ fontSize: '0.8rem' }}>Start Session</button>
+                    <button type="button" onClick={() => startSession(selectedPlan.id, day.id)} className="ara-btn ara-btn-primary" style={{ fontSize: '0.8rem' }}>Start Session</button>
                   ) : isActiveDay ? (
                     <span style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 600 }}>● Session Active</span>
                   ) : null}
                 </div>
 
-                {((day.exercises ?? []) as Record<string, unknown>[]).map((ex, idx) => {
+                {(day.exercises ?? []).map((ex, idx) => {
                   const exLog = logs[ex.id];
                   return (
                     <div key={ex.id} style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid #f8fafc' }}>
@@ -140,7 +141,7 @@ export default function ClientTraining() {
                               <input type="number" placeholder="kg" value={exLog?.sets?.[setIdx]?.weight || ''} onChange={e => logSet(ex.id, setIdx, 'weight', e.target.value)} className="ara-input" style={{ width: 70, fontSize: '0.875rem' }} />
                             </div>
                           ))}
-                          <button onClick={() => autoSave(ex.id)} style={{ fontSize: '0.75rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer', marginTop: '0.25rem' }}>Save</button>
+                          <button type="button" onClick={() => autoSave(ex.id)} style={{ fontSize: '0.75rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer', marginTop: '0.25rem' }}>Save</button>
                         </div>
                       )}
 

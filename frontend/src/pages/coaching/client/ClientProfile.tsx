@@ -57,7 +57,7 @@ export default function ClientProfile() {
             </div>
             <div>
               <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>Member since</div>
-              <div style={{ fontWeight: 500 }}>{profile?.startDate ? new Date(profile.startDate).toLocaleDateString() : '—'}</div>
+              <div style={{ fontWeight: 500 }}>{profile?.startDate ? new Date(profile.startDate as string).toLocaleDateString() : '—'}</div>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function ClientProfile() {
           {editing ? (
             <textarea value={form.goals} onChange={e => setForm(p => ({ ...p, goals: e.target.value }))} className="ara-input" rows={4} style={{ width: '100%', resize: 'vertical' }} placeholder="Describe your goals…" />
           ) : (
-            <p style={{ color: profile?.goals ? '#374151' : '#94a3b8', lineHeight: 1.6 }}>{profile?.goals || 'No goals set yet'}</p>
+            <p style={{ color: profile?.goals ? '#374151' : '#94a3b8', lineHeight: 1.6 }}>{String(profile?.goals || 'No goals set yet')}</p>
           )}
         </div>
       </div>

@@ -107,7 +107,7 @@ export default function CoachNutrition() {
                 <div key={log.id} style={{ padding: '0.75rem 1.25rem', borderBottom: '1px solid #f8fafc' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                     <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>{log.date}</span>
-                    <span style={{ fontSize: '0.875rem', color: current && log.calories >= current.calories * 0.9 ? '#166534' : '#94a3b8' }}>{log.calories} kcal</span>
+                    <span style={{ fontSize: '0.875rem', color: current && (log.calories ?? 0) >= current.calories * 0.9 ? '#166534' : '#94a3b8' }}>{log.calories} kcal</span>
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
                     P: {log.protein}g · C: {log.carbs}g · F: {log.fats}g · Water: {log.water}L

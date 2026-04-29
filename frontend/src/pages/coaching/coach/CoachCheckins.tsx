@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import type { CoachingClient, CheckIn } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
 export default function CoachCheckins() {
   const { token } = useAuth();
-  const [clients, setClients] = useState<Record<string, unknown>[]>([]);
+  const [clients, setClients] = useState<CoachingClient[]>([]);
   const [selectedClient, setSelectedClient] = useState('');
-  const [checkins, setCheckins] = useState<Record<string, unknown>[]>([]);
+  const [checkins, setCheckins] = useState<CheckIn[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');

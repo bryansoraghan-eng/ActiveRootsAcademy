@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import type { NutritionLog } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
 export default function ClientNutrition() {
   const { token, previewClientId } = useAuth();
   const [target, setTarget] = useState<Record<string, number> | null>(null);
-  const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
-  const [today, setToday] = useState<Record<string, unknown> | null>(null);
+  const [logs, setLogs] = useState<NutritionLog[]>([]);
+  const [today, setToday] = useState<NutritionLog | null>(null);
   const [form, setForm] = useState({ calories: '', protein: '', carbs: '', fats: '', water: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const cq = previewClientId ? `?clientId=${previewClientId}` : '';
@@ -21,10 +22,10 @@ export default function ClientNutrition() {
     ]).then(([t, l]) => {
       setTarget(t);
       setLogs(l);
-      const todayLog = l.find((x: Record<string, unknown>) => x.date === todayDate);
+      const todayLog = l.find((x: NutritionLog) => x.date === todayDate);
       if (todayLog) {
         setToday(todayLog);
-        setForm({ calories: String(todayLog.calories), protein: String(todayLog.protein), carbs: String(todayLog.carbs), fats: String(todayLog.fats), water: String(todayLog.water), notes: todayLog.notes ?? '' });
+        setForm({ calories: String(todayLog.calories ?? ''), protein: String(todayLog.protein ?? ''), carbs: String(todayLog.carbs ?? ''), fats: String(todayLog.fats ?? ''), water: String(todayLog.water ?? ''), notes: todayLog.notes ?? '' });
       }
     });
   }, [token, cq, todayDate]);

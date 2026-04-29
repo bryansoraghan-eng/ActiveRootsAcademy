@@ -78,7 +78,7 @@ export default function CoachProgress() {
     setUpdatingGoal(null); setNewGoalValue('');
   };
 
-  const weights = entries.filter(e => e.weight).map(e => e.weight);
+  const weights = entries.filter(e => e.weight != null).map(e => e.weight!);
 
   return (
     <div className="ara-page">

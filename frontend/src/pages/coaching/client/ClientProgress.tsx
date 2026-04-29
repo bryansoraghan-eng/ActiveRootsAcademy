@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import type { CoachingGoal, ProgressEntry, PersonalRecord } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
@@ -31,9 +32,9 @@ function LineChart({ data, label, color = '#C4703F', unit = '' }: { data: { date
 
 export default function ClientProgress() {
   const { token, previewClientId } = useAuth();
-  const [entries, setEntries] = useState<Record<string, unknown>[]>([]);
-  const [prs, setPrs] = useState<Record<string, unknown>[]>([]);
-  const [goals, setGoals] = useState<Record<string, unknown>[]>([]);
+  const [entries, setEntries] = useState<ProgressEntry[]>([]);
+  const [prs, setPrs] = useState<PersonalRecord[]>([]);
+  const [goals, setGoals] = useState<CoachingGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const cq = previewClientId ? `?clientId=${previewClientId}` : '';
 
@@ -47,15 +48,14 @@ export default function ClientProgress() {
 
   if (loading) return <div className="ara-page" style={{ color: '#94a3b8' }}>Loading…</div>;
 
-  const weights = entries.filter(e => e.weight).map(e => ({ date: e.date, value: e.weight }));
+  const weights = entries.filter(e => e.weight != null).map(e => ({ date: e.date, value: e.weight! }));
   const activeGoals = goals.filter(g => g.status === 'active');
   const completedGoals = goals.filter(g => g.status === 'completed');
 
   // Group PRs by exercise name
-  const prByExercise: Record<string, Record<string, unknown>> = {};
+  const prByExercise: Record<string, PersonalRecord> = {};
   prs.forEach(pr => {
-    const name = pr.exerciseName as string;
-    if (!prByExercise[name] || (pr.weight as number) > (prByExercise[name].weight as number)) prByExercise[name] = pr;
+    if (!prByExercise[pr.exerciseName] || pr.weight > prByExercise[pr.exerciseName].weight) prByExercise[pr.exerciseName] = pr;
   });
 
   return (
