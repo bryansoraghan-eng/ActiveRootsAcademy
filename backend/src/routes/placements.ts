@@ -55,13 +55,16 @@ router.post('/', authenticate, async (req: any, res) => {
 });
 
 // Get placement by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const placement = await prisma.placement.findUnique({
       where: { id: req.params.id },
       include: { coach: true, school: true },
     });
     if (!placement) return res.status(404).json({ error: 'Placement not found' });
+    if (req.user.role !== 'admin' && placement.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(placement);
   } catch (error) {
     console.error('Get placement error:', error);

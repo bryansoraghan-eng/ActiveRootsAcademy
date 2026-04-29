@@ -85,10 +85,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    // Resolve school — either by direct schoolId or by schoolCode lookup
-    let resolvedSchoolId: string | undefined = schoolId || undefined;
+    // Resolve school
+    let resolvedSchoolId: string | undefined = undefined;
 
-    if (schoolCode && !resolvedSchoolId) {
+    if (role === 'teacher') {
+      // Teachers must always supply a school code — raw schoolId is not accepted
+      if (!schoolCode) {
+        return res.status(400).json({ error: 'Teachers must provide a valid school code.' });
+      }
       const school = await prisma.school.findUnique({
         where: { schoolCode: schoolCode.toUpperCase() },
       });
@@ -96,19 +100,16 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'School code not found. Please check the code with your administrator.' });
       }
       resolvedSchoolId = school.id;
-    }
-
-    // Teachers must have a valid school code
-    if (role === 'teacher') {
-      if (!resolvedSchoolId) {
-        return res.status(400).json({ error: 'Teachers must provide a valid school code or select a school.' });
-      }
-      // Verify the school code actually belongs to this school (if both provided)
-      if (schoolCode && schoolId) {
-        const school = await prisma.school.findUnique({ where: { id: schoolId } });
-        if (!school || school.schoolCode !== schoolCode.toUpperCase()) {
-          return res.status(400).json({ error: 'Incorrect school code for the selected school.' });
+    } else {
+      resolvedSchoolId = schoolId || undefined;
+      if (schoolCode && !resolvedSchoolId) {
+        const school = await prisma.school.findUnique({
+          where: { schoolCode: schoolCode.toUpperCase() },
+        });
+        if (!school) {
+          return res.status(400).json({ error: 'School code not found. Please check the code with your administrator.' });
         }
+        resolvedSchoolId = school.id;
       }
     }
 
@@ -157,53 +158,19 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ── Legacy teacher self-registration (kept for backward compat) ───────────────
-router.post('/register-teacher', async (req, res) => {
-  try {
-    const { email, password, name, schoolId, schoolCode } = req.body;
-
-    if (!email || !password || !name || !schoolId) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    // Server-side school code validation
-    const school = await prisma.school.findUnique({ where: { id: schoolId } });
-    if (!school) {
-      return res.status(400).json({ error: 'School not found' });
-    }
-
-    if (school.schoolCode) {
-      if (!schoolCode || schoolCode.toUpperCase() !== school.schoolCode) {
-        return res.status(400).json({ error: 'Incorrect school code. Please check with your school administrator.' });
-      }
-    } else {
-      // Fallback: first 3 chars of school name (legacy behaviour while codes are being set up)
-      const expectedCode = school.name.slice(0, 3).toLowerCase();
-      if (!schoolCode || schoolCode.toLowerCase() !== expectedCode) {
-        return res.status(400).json({ error: 'Incorrect school code. Please check with your school administrator.' });
-      }
-    }
-
-    const existing = await prisma.teacher.findUnique({ where: { email } });
-    if (existing) {
-      return res.status(400).json({ error: 'An account with this email already exists' });
-    }
-
-    const hashed = await bcrypt.hash(password, 10);
-    const teacher = await prisma.teacher.create({
-      data: { email, name, password: hashed, schoolId },
-      include: { school: true },
-    });
-
-    res.status(201).json({
-      message: 'Account created successfully',
-      teacher: { id: teacher.id, email: teacher.email, name: teacher.name, school: teacher.school },
-    });
-  } catch (error) {
-    console.error('Teacher register error:', error);
-    res.status(400).json({ error: 'Registration failed' });
-  }
+// ── Legacy teacher self-registration (removed — use POST /register with role: 'teacher') ──
+router.post('/register-teacher', (_req, res) => {
+  res.status(410).json({ error: 'This endpoint has been removed. Use POST /api/auth/register with role: "teacher".' });
 });
+
+// ── Auth failure logger ───────────────────────────────────────────────────────
+function logAuthFailure(email: string, req: express.Request, reason: string) {
+  const ip =
+    (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0].trim() ??
+    req.ip ??
+    'unknown';
+  console.warn(`[AUTH FAIL] ${new Date().toISOString()} | ip=${ip} | email=${email} | reason=${reason}`);
+}
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
@@ -218,9 +185,11 @@ router.post('/login', async (req, res) => {
 
     if (user) {
       if (!(await bcrypt.compare(password, user.password))) {
+        logAuthFailure(email, req, 'wrong_password');
         return res.status(401).json({ error: 'Invalid credentials' });
       }
       if (user.status === 'pending') {
+        logAuthFailure(email, req, 'account_pending');
         return res.status(403).json({ error: 'Your account is pending admin approval. You\'ll receive access once an administrator approves your request.' });
       }
       const coachingRoles = ['online_coach', 'client'];
@@ -231,7 +200,9 @@ router.post('/login', async (req, res) => {
         { expiresIn: '24h' }
       );
       let customPermissions: Record<string, any> = {};
-      try { customPermissions = JSON.parse(user.permissions || '{}'); } catch {}
+      try { customPermissions = JSON.parse(user.permissions || '{}'); } catch {
+        console.error(`[AUTH] Malformed permissions JSON for user ${user.id} — defaulting to empty`);
+      }
       return res.json({
         token,
         userType,
@@ -250,6 +221,7 @@ router.post('/login', async (req, res) => {
     });
 
     if (!teacher || !(await bcrypt.compare(password, teacher.password))) {
+      logAuthFailure(email, req, teacher ? 'wrong_password' : 'email_not_found');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

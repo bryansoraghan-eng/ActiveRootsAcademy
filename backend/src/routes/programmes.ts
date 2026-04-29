@@ -8,12 +8,15 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const router = express.Router();
 
 // Get all programme blocks
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
-    const { schoolId, type } = req.query;
+    const { type } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin'
+      ? req.user.schoolId
+      : (req.query.schoolId as string | undefined);
     const programmes = await prisma.programmeBlock.findMany({
       where: {
-        ...(schoolId ? { schoolId: schoolId as string } : {}),
+        ...(effectiveSchoolId ? { schoolId: effectiveSchoolId } : {}),
         ...(type ? { type: type as string } : {}),
       },
       include: {
@@ -29,16 +32,17 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Create programme block
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: any, res) => {
   try {
-    const { name, description, duration, type, schoolId } = req.body;
+    const { name, description, duration, type } = req.body;
+    const effectiveSchoolId = req.user.role === 'admin' ? (req.body.schoolId ?? req.user.schoolId) : req.user.schoolId;
     const programme = await prisma.programmeBlock.create({
       data: {
         name,
         description,
         duration,
         type,
-        school: { connect: { id: schoolId } },
+        school: { connect: { id: effectiveSchoolId } },
       },
       include: { school: true },
     });
@@ -50,7 +54,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Get programme by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const programme = await prisma.programmeBlock.findUnique({
       where: { id: req.params.id },
@@ -65,6 +69,9 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
     if (!programme) return res.status(404).json({ error: 'Programme not found' });
+    if (req.user.role !== 'admin' && programme.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(programme);
   } catch (error) {
     console.error('Get programme error:', error);
@@ -73,8 +80,13 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update programme
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.programmeBlock.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Programme not found' });
+    if (req.user.role !== 'admin' && existing.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     const { name, description, duration, type } = req.body;
     const programme = await prisma.programmeBlock.update({
       where: { id: req.params.id },
@@ -89,8 +101,13 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete programme
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.programmeBlock.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Programme not found' });
+    if (req.user.role !== 'admin' && existing.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     await prisma.programmeBlock.delete({ where: { id: req.params.id } });
     res.json({ message: 'Programme deleted' });
   } catch (error) {

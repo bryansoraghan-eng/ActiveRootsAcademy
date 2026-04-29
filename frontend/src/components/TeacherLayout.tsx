@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { can } from '../lib/permissions';
@@ -15,6 +16,9 @@ const Ic = {
 
 export default function TeacherLayout() {
   const { user, permissions, logout, impersonateName, stopImpersonation } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const closeSidebar = () => setSidebarOpen(false);
 
   const basePath = impersonateName ? '/preview/teacher' : '/teacher';
 
@@ -34,7 +38,21 @@ export default function TeacherLayout() {
 
   return (
     <div className="ara-app-shell">
-      <aside className="ara-sidebar">
+      {/* Mobile top bar */}
+      <div className="ara-mobile-topbar">
+        <button type="button" className="ara-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span className="ara-mobile-topbar-title">Active <span className="ara-sidebar-wordmark-accent">Roots</span></span>
+      </div>
+
+      {/* Backdrop */}
+      {sidebarOpen && <div className="ara-sidebar-backdrop" onClick={closeSidebar} />}
+
+      <aside className={`ara-sidebar${sidebarOpen ? ' ara-sidebar-open' : ''}`}>
+        <button type="button" className="ara-sidebar-close" onClick={closeSidebar} aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
         <div className="ara-sidebar-logo">
           <img src="/logo-mark.svg" className="ara-sidebar-logo-img" alt="" />
           <div>
@@ -59,7 +77,7 @@ export default function TeacherLayout() {
         )}
 
         <div className="ara-sidebar-dashboard">
-          <NavLink to={basePath} end className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
+          <NavLink to={basePath} end onClick={closeSidebar} className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
             {Ic.home}
             Dashboard
           </NavLink>
@@ -69,7 +87,7 @@ export default function TeacherLayout() {
           <div className="ara-sidebar-group">
             <div className="ara-sidebar-group-items">
               {visibleItems.slice(1).map(({ to, label, icon }) => (
-                <NavLink key={to} to={to} className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
+                <NavLink key={to} to={to} onClick={closeSidebar} className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
                   {icon}
                   {label}
                 </NavLink>

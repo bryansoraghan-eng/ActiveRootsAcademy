@@ -51,6 +51,12 @@ router.post('/', authenticate, async (req: any, res) => {
   if (!adminOrCoach(req, res)) return;
   try {
     const { classId, coachId, date, notes, fmsScores } = req.body;
+    if (req.user.role !== 'admin') {
+      const targetClass = await prisma.class.findUnique({ where: { id: classId } });
+      if (!targetClass || targetClass.schoolId !== req.user.schoolId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    }
     const assessment = await prisma.assessment.create({
       data: {
         class: { connect: { id: classId } },
@@ -69,7 +75,7 @@ router.post('/', authenticate, async (req: any, res) => {
 });
 
 // Get assessment by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const assessment = await prisma.assessment.findUnique({
       where: { id: req.params.id },
@@ -79,6 +85,9 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
     if (!assessment) return res.status(404).json({ error: 'Assessment not found' });
+    if (req.user.role !== 'admin' && assessment.class.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(assessment);
   } catch (error) {
     console.error('Get assessment error:', error);
@@ -90,6 +99,14 @@ router.get('/:id', authenticate, async (req, res) => {
 router.put('/:id', authenticate, async (req: any, res) => {
   if (!adminOrCoach(req, res)) return;
   try {
+    const existing = await prisma.assessment.findUnique({
+      where: { id: req.params.id },
+      include: { class: true },
+    });
+    if (!existing) return res.status(404).json({ error: 'Assessment not found' });
+    if (req.user.role !== 'admin' && existing.class.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     const { date, notes, fmsScores } = req.body;
     const assessment = await prisma.assessment.update({
       where: { id: req.params.id },

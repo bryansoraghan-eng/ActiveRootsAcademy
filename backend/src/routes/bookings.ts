@@ -70,7 +70,7 @@ router.post('/', authenticate, async (req: any, res) => {
 });
 
 // Get booking by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: req.params.id },
@@ -82,6 +82,9 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (req.user.role !== 'admin' && booking.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(booking);
   } catch (error) {
     console.error('Get booking error:', error);

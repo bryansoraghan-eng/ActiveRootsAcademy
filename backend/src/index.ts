@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth';
 import schoolRoutes from './routes/schools';
 import classRoutes from './routes/classes';
@@ -29,12 +28,15 @@ import coachingGoalsRoutes from './routes/coaching/goals';
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '')
   .split(',')
   .map(o => o.trim())
   .filter(Boolean);
+
+if (allowedOrigins.length === 0 && process.env.NODE_ENV === 'production') {
+  console.warn('[CORS] WARNING: ALLOWED_ORIGINS is not set — all cross-origin requests are blocked in production.');
+}
 
 app.use(cors({
   origin: allowedOrigins.length > 0
@@ -45,7 +47,7 @@ app.use(cors({
           callback(new Error(`CORS: origin ${origin} not allowed`));
         }
       }
-    : true,
+    : process.env.NODE_ENV !== 'production',
   credentials: true,
 }));
 app.use(express.json());
@@ -74,7 +76,6 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-app.use('/api/auth/register-teacher', authLimiter);
 app.use('/api/nutrition/generate', aiLimiter);
 app.use('/api/lesson-plans/generate', aiLimiter);
 app.use('/api/auth', authRoutes);

@@ -278,11 +278,11 @@ router.post('/movement-breaks', authenticate, async (req, res) => {
 
 // ===== PLACEMENT STUDENTS =====
 // Get all placement students
-router.get('/placement-students', authenticate, async (req, res) => {
+router.get('/placement-students', authenticate, async (req: any, res) => {
   try {
-    const { schoolId } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin' ? req.user.schoolId : (req.query.schoolId as string | undefined);
     const students = await prisma.placementStudent.findMany({
-      where: schoolId ? { schoolId: schoolId as string } : {},
+      where: effectiveSchoolId ? { schoolId: effectiveSchoolId } : {},
       include: { school: true },
     });
     res.json(students);
@@ -293,13 +293,14 @@ router.get('/placement-students', authenticate, async (req, res) => {
 });
 
 // Create placement student
-router.post('/placement-students', authenticate, async (req, res) => {
+router.post('/placement-students', authenticate, async (req: any, res) => {
   try {
-    const { name, schoolId, yeartarget, collegeTarget, notes } = req.body;
+    const { name, yeartarget, collegeTarget, notes } = req.body;
+    const effectiveSchoolId = req.user.role === 'admin' ? (req.body.schoolId ?? req.user.schoolId) : req.user.schoolId;
     const student = await prisma.placementStudent.create({
       data: {
         name,
-        school: { connect: { id: schoolId } },
+        school: { connect: { id: effectiveSchoolId } },
         yeartarget,
         collegeTarget,
         notes,
@@ -314,13 +315,16 @@ router.post('/placement-students', authenticate, async (req, res) => {
 });
 
 // Get placement student by ID
-router.get('/placement-students/:id', authenticate, async (req, res) => {
+router.get('/placement-students/:id', authenticate, async (req: any, res) => {
   try {
     const student = await prisma.placementStudent.findUnique({
       where: { id: req.params.id },
       include: { school: true },
     });
     if (!student) return res.status(404).json({ error: 'Student not found' });
+    if (req.user.role !== 'admin' && student.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(student);
   } catch (error) {
     console.error('Get placement student error:', error);
@@ -329,8 +333,13 @@ router.get('/placement-students/:id', authenticate, async (req, res) => {
 });
 
 // Update placement student
-router.put('/placement-students/:id', authenticate, async (req, res) => {
+router.put('/placement-students/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.placementStudent.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Student not found' });
+    if (req.user.role !== 'admin' && existing.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     const { name, yeartarget, collegeTarget, notes } = req.body;
     const student = await prisma.placementStudent.update({
       where: { id: req.params.id },
@@ -345,8 +354,13 @@ router.put('/placement-students/:id', authenticate, async (req, res) => {
 });
 
 // Delete placement student
-router.delete('/placement-students/:id', authenticate, async (req, res) => {
+router.delete('/placement-students/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.placementStudent.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Student not found' });
+    if (req.user.role !== 'admin' && existing.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     await prisma.placementStudent.delete({ where: { id: req.params.id } });
     res.json({ message: 'Student deleted' });
   } catch (error) {
@@ -467,7 +481,12 @@ Return ONLY valid JSON with this exact structure, no extra text:
       model: 'gemini-2.0-flash',
       systemInstruction: systemPrompt,
     });
-    const result = await model.generateContent(userPrompt);
+    const result = await Promise.race([
+      model.generateContent(userPrompt),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('AI request timed out')), 10_000)
+      ),
+    ]);
     const text = result.response.text();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {

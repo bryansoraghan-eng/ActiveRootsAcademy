@@ -186,12 +186,13 @@ async function buildFallbackProgramme(classLevel: string, weeks: number, skillFo
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
-    const { schoolId, classLevel } = req.query;
+    const { classLevel } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin' ? req.user.schoolId : (req.query.schoolId as string | undefined);
     const plans = await prisma.lessonPlan.findMany({
       where: {
-        ...(schoolId ? { schoolId: schoolId as string } : {}),
+        ...(effectiveSchoolId ? { schoolId: effectiveSchoolId } : {}),
         ...(classLevel ? { classLevel: classLevel as string } : {}),
       },
       include: { school: true },
@@ -205,11 +206,11 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Must be before /:id to avoid route conflict
-router.get('/programmes', authenticate, async (req, res) => {
+router.get('/programmes', authenticate, async (req: any, res) => {
   try {
-    const { schoolId } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin' ? req.user.schoolId : (req.query.schoolId as string | undefined);
     const programmes = await prisma.generatedProgramme.findMany({
-      where: schoolId ? { schoolId: schoolId as string } : {},
+      where: effectiveSchoolId ? { schoolId: effectiveSchoolId } : {},
       orderBy: { createdAt: 'desc' },
     });
     res.json(programmes);
@@ -218,8 +219,13 @@ router.get('/programmes', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/programmes/:id', authenticate, async (req, res) => {
+router.delete('/programmes/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.generatedProgramme.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Programme not found' });
+    if (req.user.role !== 'admin' && existing.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     await prisma.generatedProgramme.delete({ where: { id: req.params.id } });
     res.json({ message: 'Programme deleted' });
   } catch {
@@ -227,8 +233,9 @@ router.delete('/programmes/:id', authenticate, async (req, res) => {
   }
 });
 
-router.post('/generate-programme', authenticate, async (req, res) => {
-  const { classLevel, weeks, skillFocus, equipment, schoolId } = req.body;
+router.post('/generate-programme', authenticate, async (req: any, res) => {
+  const { classLevel, weeks, skillFocus, equipment } = req.body;
+  const effectiveSchoolId = req.user.role === 'admin' ? (req.body.schoolId ?? undefined) : req.user.schoolId;
 
   if (!classLevel || !weeks || !skillFocus?.length) {
     return res.status(400).json({ error: 'classLevel, weeks, and skillFocus are required' });
@@ -346,7 +353,7 @@ Return ONLY valid JSON:
         skillFocus: JSON.stringify(generated.weeks?.[0]?.skillFocus ?? skillFocus),
         equipment: JSON.stringify(equipList),
         weeks: JSON.stringify(generated.weeks),
-        schoolId: schoolId || undefined,
+        schoolId: effectiveSchoolId || undefined,
         generatedBy: source,
       },
     });
@@ -356,21 +363,29 @@ Return ONLY valid JSON:
   }
 });
 
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const plan = await prisma.lessonPlan.findUnique({
       where: { id: req.params.id },
       include: { school: true },
     });
     if (!plan) return res.status(404).json({ error: 'Lesson plan not found' });
+    if (req.user.role !== 'admin' && plan.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(plan);
   } catch {
     res.status(500).json({ error: 'Failed to fetch lesson plan' });
   }
 });
 
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.lessonPlan.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Lesson plan not found' });
+    if (req.user.role !== 'admin' && existing.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     await prisma.lessonPlan.delete({ where: { id: req.params.id } });
     res.json({ message: 'Lesson plan deleted' });
   } catch {
@@ -378,8 +393,9 @@ router.delete('/:id', authenticate, async (req, res) => {
   }
 });
 
-router.post('/generate', authenticate, async (req, res) => {
-  const { classLevel, duration, skillFocus, equipment, schoolId } = req.body;
+router.post('/generate', authenticate, async (req: any, res) => {
+  const { classLevel, duration, skillFocus, equipment } = req.body;
+  const effectiveSchoolId = req.user.role === 'admin' ? (req.body.schoolId ?? undefined) : req.user.schoolId;
 
   if (!classLevel || !duration || !skillFocus?.length) {
     return res.status(400).json({ error: 'classLevel, duration, and skillFocus are required' });
@@ -500,7 +516,7 @@ Return ONLY valid JSON in this exact format, no extra text:
         coolDown: JSON.stringify(generated.coolDown),
         equipment: JSON.stringify(generated.equipment),
         notes: JSON.stringify({ safetyNotes: generated.safetyNotes, teacherTips: generated.teacherTips }),
-        schoolId: schoolId || undefined,
+        schoolId: effectiveSchoolId || undefined,
         generatedBy: source,
       },
       include: { school: true },

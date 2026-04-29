@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import TeacherLayout from './components/TeacherLayout';
 import CoachingLayout from './components/CoachingLayout';
@@ -58,83 +59,91 @@ function AppRoutes() {
 
   if (userType === 'online_coach') {
     return (
-      <Routes>
-        <Route element={<CoachingLayout />}>
-          <Route path="/coaching" element={<CoachDashboard />} />
-          <Route path="/coaching/clients" element={<CoachClients />} />
-          <Route path="/coaching/clients/:id" element={<CoachClients />} />
-          <Route path="/coaching/training" element={<CoachTraining />} />
-          <Route path="/coaching/nutrition" element={<CoachNutrition />} />
-          <Route path="/coaching/progress" element={<CoachProgress />} />
-          <Route path="/coaching/checkins" element={<CoachCheckins />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/coaching" replace />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route element={<CoachingLayout />}>
+            <Route path="/coaching" element={<CoachDashboard />} />
+            <Route path="/coaching/clients" element={<CoachClients />} />
+            <Route path="/coaching/clients/:id" element={<CoachClients />} />
+            <Route path="/coaching/training" element={<CoachTraining />} />
+            <Route path="/coaching/nutrition" element={<CoachNutrition />} />
+            <Route path="/coaching/progress" element={<CoachProgress />} />
+            <Route path="/coaching/checkins" element={<CoachCheckins />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/coaching" replace />} />
+        </Routes>
+      </ErrorBoundary>
     );
   }
 
   if (userType === 'client') {
     return (
-      <Routes>
-        <Route element={<ClientLayout />}>
-          <Route path="/client" element={<ClientDashboard />} />
-          <Route path="/client/training" element={<ClientTraining />} />
-          <Route path="/client/nutrition" element={<ClientNutrition />} />
-          <Route path="/client/progress" element={<ClientProgress />} />
-          <Route path="/client/checkins" element={<ClientCheckins />} />
-          <Route path="/client/profile" element={<ClientProfile />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/client" replace />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route element={<ClientLayout />}>
+            <Route path="/client" element={<ClientDashboard />} />
+            <Route path="/client/training" element={<ClientTraining />} />
+            <Route path="/client/nutrition" element={<ClientNutrition />} />
+            <Route path="/client/progress" element={<ClientProgress />} />
+            <Route path="/client/checkins" element={<ClientCheckins />} />
+            <Route path="/client/profile" element={<ClientProfile />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/client" replace />} />
+        </Routes>
+      </ErrorBoundary>
     );
   }
 
   if (userType === 'teacher') {
     return (
-      <Routes>
-        <Route element={<TeacherLayout />}>
-          <Route path="/teacher" element={<TeacherDashboard />} />
-          <Route path="/teacher/classes" element={<TeacherClasses />} />
-          <Route path="/teacher/assessments" element={<TeacherAssessments />} />
-          <Route path="/teacher/nutrition" element={<Nutrition />} />
-          <Route path="/teacher/lesson-plans" element={<LessonPlans />} />
-          <Route path="/teacher/fms" element={<FMSLibrary />} />
-          <Route path="/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/teacher" replace />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route element={<TeacherLayout />}>
+            <Route path="/teacher" element={<TeacherDashboard />} />
+            <Route path="/teacher/classes" element={<TeacherClasses />} />
+            <Route path="/teacher/assessments" element={<TeacherAssessments />} />
+            <Route path="/teacher/nutrition" element={<Nutrition />} />
+            <Route path="/teacher/lesson-plans" element={<LessonPlans />} />
+            <Route path="/teacher/fms" element={<FMSLibrary />} />
+            <Route path="/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/teacher" replace />} />
+        </Routes>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/schools" element={<Schools />} />
-        <Route path="/teachers" element={<Teachers />} />
-        <Route path="/classes" element={<Classes />} />
-        <Route path="/coaches" element={<Coaches />} />
-        <Route path="/programmes" element={<Programmes />} />
-        <Route path="/bookings" element={<Bookings />} />
-        <Route path="/assessments" element={<Assessments />} />
-        <Route path="/placements" element={<Placements />} />
-        <Route path="/nutrition" element={<Nutrition />} />
-        <Route path="/lesson-plans" element={<LessonPlans />} />
-        <Route path="/fms" element={<FMSLibrary />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/movement-breaks" element={<MovementBreaks />} />
-      </Route>
-      <Route element={<TeacherLayout />}>
-        <Route path="/preview/teacher" element={<TeacherDashboard />} />
-        <Route path="/preview/teacher/classes" element={<TeacherClasses />} />
-        <Route path="/preview/teacher/assessments" element={<TeacherAssessments />} />
-        <Route path="/preview/teacher/nutrition" element={<Nutrition />} />
-        <Route path="/preview/teacher/lesson-plans" element={<LessonPlans />} />
-        <Route path="/preview/teacher/fms" element={<FMSLibrary />} />
-        <Route path="/preview/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/schools" element={<Schools />} />
+          <Route path="/teachers" element={<Teachers />} />
+          <Route path="/classes" element={<Classes />} />
+          <Route path="/coaches" element={<Coaches />} />
+          <Route path="/programmes" element={<Programmes />} />
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/assessments" element={<Assessments />} />
+          <Route path="/placements" element={<Placements />} />
+          <Route path="/nutrition" element={<Nutrition />} />
+          <Route path="/lesson-plans" element={<LessonPlans />} />
+          <Route path="/fms" element={<FMSLibrary />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/movement-breaks" element={<MovementBreaks />} />
+        </Route>
+        <Route element={<TeacherLayout />}>
+          <Route path="/preview/teacher" element={<TeacherDashboard />} />
+          <Route path="/preview/teacher/classes" element={<TeacherClasses />} />
+          <Route path="/preview/teacher/assessments" element={<TeacherAssessments />} />
+          <Route path="/preview/teacher/nutrition" element={<Nutrition />} />
+          <Route path="/preview/teacher/lesson-plans" element={<LessonPlans />} />
+          <Route path="/preview/teacher/fms" element={<FMSLibrary />} />
+          <Route path="/preview/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 

@@ -30,7 +30,10 @@ function pickBreak(usedNames: Set<string>, ageRange: string): any {
 }
 
 // ── GET settings for a school ──────────────────────────────────────────────
-router.get('/settings/:schoolId', authenticate, async (req, res) => {
+router.get('/settings/:schoolId', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'admin' && req.params.schoolId !== req.user.schoolId) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
   try {
     const settings = await prisma.movementBreakSettings.findUnique({ where: { schoolId: req.params.schoolId } });
     res.json(settings ?? { schoolId: req.params.schoolId, minBreaks: 4, duration: 2, isEnabled: true });
@@ -43,6 +46,9 @@ router.get('/settings/:schoolId', authenticate, async (req, res) => {
 router.put('/settings/:schoolId', authenticate, async (req: any, res) => {
   if (req.user.role !== 'admin' && req.user.role !== 'school_admin') {
     return res.status(403).json({ error: 'Admin only' });
+  }
+  if (req.user.role !== 'admin' && req.params.schoolId !== req.user.schoolId) {
+    return res.status(403).json({ error: 'Forbidden' });
   }
   const { minBreaks, duration, isEnabled } = req.body;
   try {
@@ -60,10 +66,11 @@ router.put('/settings/:schoolId', authenticate, async (req: any, res) => {
 // ── GET current schedule for a teacher/school ─────────────────────────────
 router.get('/schedule', authenticate, async (req: any, res) => {
   try {
-    const { schoolId, teacherId } = req.query;
+    const { teacherId } = req.query;
+    const effectiveSchoolId = req.user.role !== 'admin' ? req.user.schoolId : (req.query.schoolId as string | undefined);
     const schedule = await prisma.movementBreakSchedule.findFirst({
       where: {
-        ...(schoolId ? { schoolId: schoolId as string } : {}),
+        ...(effectiveSchoolId ? { schoolId: effectiveSchoolId } : {}),
         ...(teacherId ? { teacherId: teacherId as string } : {}),
       },
       orderBy: { updatedAt: 'desc' },
@@ -76,7 +83,8 @@ router.get('/schedule', authenticate, async (req: any, res) => {
 
 // ── POST generate a full schedule ─────────────────────────────────────────
 router.post('/generate', authenticate, async (req: any, res) => {
-  const { slots, mode, ageRange, schoolId, minBreaks } = req.body;
+  const { slots, mode, ageRange, minBreaks } = req.body;
+  const effectiveSchoolId = req.user.role === 'admin' ? (req.body.schoolId ?? undefined) : req.user.schoolId;
   // slots: [{time: "10:00", isManual: false, customBreakName?: string}]
 
   if (!slots?.length) return res.status(400).json({ error: 'At least one time slot is required' });
@@ -157,7 +165,7 @@ Return ONLY a JSON array with exactly ${randomSlots.length} objects:
   try {
     const saved = await prisma.movementBreakSchedule.create({
       data: {
-        schoolId: schoolId || undefined,
+        schoolId: effectiveSchoolId || undefined,
         teacherId: req.user.id,
         ageRange: ageRange || '6-8',
         mode: mode || 'mixed',

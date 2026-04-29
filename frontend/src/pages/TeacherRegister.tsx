@@ -28,13 +28,6 @@ export default function TeacherRegister() {
     e.preventDefault();
     setError('');
 
-    const selectedSchool = schools.find(s => s.id === form.schoolId);
-    const expectedCode = selectedSchool?.name.slice(0, 3).toLowerCase();
-    if (form.schoolCode.toLowerCase() !== expectedCode) {
-      setError('Incorrect school code. Please check with your school administrator.');
-      return;
-    }
-
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -46,14 +39,16 @@ export default function TeacherRegister() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${BASE}/auth/register-teacher`, {
+      const res = await fetch(`${BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
           email: form.email,
           password: form.password,
+          role: 'teacher',
           schoolId: form.schoolId,
+          schoolCode: form.schoolCode,
         }),
       });
 
@@ -156,7 +151,7 @@ export default function TeacherRegister() {
                 onChange={e => setForm(f => ({ ...f, schoolCode: e.target.value }))}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your school code"
-                maxLength={3}
+                maxLength={6}
               />
               <p className="text-xs text-slate-400 mt-1">Ask your school administrator for this code.</p>
             </div>

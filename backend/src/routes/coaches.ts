@@ -22,7 +22,8 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Create coach
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
   try {
     const { name, email, phone, specialisation, isPlacement } = req.body;
     const coach = await prisma.coach.create({
@@ -37,7 +38,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Get coach by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const coach = await prisma.coach.findUnique({
       where: { id: req.params.id },
@@ -48,6 +49,12 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
     if (!coach) return res.status(404).json({ error: 'Coach not found' });
+    if (req.user.role !== 'admin') {
+      const linkedToSchool =
+        coach.placements.some((p: any) => p.schoolId === req.user.schoolId) ||
+        coach.bookings.some((b: any) => b.schoolId === req.user.schoolId);
+      if (!linkedToSchool) return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(coach);
   } catch (error) {
     console.error('Get coach error:', error);
@@ -56,7 +63,8 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update coach
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
   try {
     const { name, email, phone, specialisation, isPlacement } = req.body;
     const coach = await prisma.coach.update({
@@ -72,7 +80,8 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete coach
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
   try {
     await prisma.coach.delete({ where: { id: req.params.id } });
     res.json({ message: 'Coach deleted' });
@@ -91,7 +100,12 @@ router.get('/:id/permissions', authenticate, async (req: any, res) => {
       select: { permissions: true },
     });
     if (!coach) return res.status(404).json({ error: 'Coach not found' });
-    res.json(JSON.parse(coach.permissions || '{}'));
+    try {
+      res.json(JSON.parse(coach.permissions || '{}'));
+    } catch {
+      console.error(`[COACHES] Malformed permissions JSON for coach ${req.params.id} — returning empty`);
+      res.json({});
+    }
   } catch {
     res.status(500).json({ error: 'Failed to fetch permissions' });
   }

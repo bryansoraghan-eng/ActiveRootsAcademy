@@ -31,10 +31,10 @@ router.post('/impersonate/:userId', authenticate, async (req: any, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, role: true },
+      select: { id: true, name: true, role: true, permissions: true, schoolId: true },
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, name: user.name, role: user.role });
+    res.json({ id: user.id, name: user.name, role: user.role, permissions: user.permissions, schoolId: user.schoolId });
   } catch {
     res.status(500).json({ error: 'Failed to impersonate user' });
   }

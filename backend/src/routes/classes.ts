@@ -57,7 +57,7 @@ router.post('/', authenticate, async (req: any, res) => {
 });
 
 // Get class by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const class_ = await prisma.class.findUnique({
       where: { id: req.params.id },
@@ -69,6 +69,9 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
     if (!class_) return res.status(404).json({ error: 'Class not found' });
+    if (req.user.role !== 'admin' && class_.schoolId !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(class_);
   } catch (error) {
     console.error('Get class error:', error);

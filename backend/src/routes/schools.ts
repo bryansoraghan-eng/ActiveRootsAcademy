@@ -6,9 +6,11 @@ import { uniqueSchoolCode } from './auth';
 const router = express.Router();
 
 // Get all schools
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: any, res) => {
   try {
+    const effectiveSchoolId = req.user.role !== 'admin' ? req.user.schoolId : undefined;
     const schools = await prisma.school.findMany({
+      where: effectiveSchoolId ? { id: effectiveSchoolId } : {},
       include: { classes: true, teachers: true, programmes: true },
     });
     res.json(schools);
@@ -35,7 +37,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Get school by ID
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, async (req: any, res) => {
   try {
     const school = await prisma.school.findUnique({
       where: { id: req.params.id },
@@ -45,6 +47,9 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
     if (!school) return res.status(404).json({ error: 'School not found' });
+    if (req.user.role !== 'admin' && school.id !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     res.json(school);
   } catch (error) {
     console.error('Get school error:', error);
@@ -53,8 +58,13 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Update school
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.school.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'School not found' });
+    if (req.user.role !== 'admin' && existing.id !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     const { name, address, phone, principal, email } = req.body;
     const school = await prisma.school.update({
       where: { id: req.params.id },
@@ -84,8 +94,13 @@ router.post('/:id/regenerate-code', authenticate, async (req: any, res) => {
 });
 
 // Delete school
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: any, res) => {
   try {
+    const existing = await prisma.school.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'School not found' });
+    if (req.user.role !== 'admin' && existing.id !== req.user.schoolId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     await prisma.school.delete({ where: { id: req.params.id } });
     res.json({ message: 'School deleted' });
   } catch (error) {
