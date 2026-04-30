@@ -2,9 +2,17 @@ export interface CoachingClient {
   id: string;
   status: string;
   startDate?: string;
-  user?: { name: string; email: string };
+  age?: number;
+  startingWeight?: number;
+  height?: number;
+  goals?: string;
+  user?: { id?: string; name: string; email: string };
   clientGoals?: CoachingGoal[];
-  trainingPlans?: unknown[];
+  trainingPlans?: TrainingPlan[];
+  nutritionTargets?: NutritionTarget[];
+  checkIns?: CheckIn[];
+  progressEntries?: ProgressEntry[];
+  personalRecords?: PersonalRecord[];
 }
 
 export interface NutritionTarget {

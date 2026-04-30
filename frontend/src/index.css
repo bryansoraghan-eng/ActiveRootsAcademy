@@ -1507,6 +1507,23 @@ h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; }
   color: var(--fg2);
 }
 
+/* ── Coach note on check-in ──────────────────────────────── */
+.ara-coach-note {
+  font-size: 0.875rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  background: #fef3e9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.ara-coach-note-label {
+  font-size: 0.7rem;
+  color: #92400e;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
 /* ── Confirm / delete modal text ─────────────────────────── */
 .ara-confirm-text {
   font-size: 14px;

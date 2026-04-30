@@ -1,5 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import prisma from '../../db';
 import { authenticate } from '../../middleware/auth';
 
@@ -44,6 +45,50 @@ router.get('/me', authenticate, async (req: any, res) => {
     });
     if (!client) return res.status(404).json({ error: 'Client profile not found' });
     res.json(client);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PUT /me — client updates their own profile
+router.put('/me', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'client') return res.status(403).json({ error: 'Forbidden' });
+  const { age, startingWeight, height, goals } = req.body;
+  try {
+    const client = await prisma.coachingClient.update({
+      where: { userId: req.user.id },
+      data: {
+        age: age !== undefined ? parseInt(age) : undefined,
+        startingWeight: startingWeight !== undefined ? parseFloat(startingWeight) : undefined,
+        height: height !== undefined ? parseFloat(height) : undefined,
+        goals,
+      },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    });
+    res.json(client);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /preview-token — coach gets a short-lived client-scoped JWT for preview
+router.post('/preview-token', authenticate, async (req: any, res) => {
+  if (req.user.role !== 'online_coach') return res.status(403).json({ error: 'Forbidden' });
+  const { clientId } = req.body;
+  if (!clientId) return res.status(400).json({ error: 'clientId required' });
+  try {
+    const client = await prisma.coachingClient.findUnique({
+      where: { id: clientId },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    });
+    if (!client) return res.status(404).json({ error: 'Client not found' });
+    if (client.coachId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+    const previewToken = jwt.sign(
+      { id: client.userId, role: 'client', isPreview: true },
+      process.env.JWT_SECRET!,
+      { expiresIn: '8h' }
+    );
+    res.json({ token: previewToken, user: client.user });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

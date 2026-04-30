@@ -32,6 +32,7 @@ import CoachTraining from './pages/coaching/coach/CoachTraining';
 import CoachNutrition from './pages/coaching/coach/CoachNutrition';
 import CoachProgress from './pages/coaching/coach/CoachProgress';
 import CoachCheckins from './pages/coaching/coach/CoachCheckins';
+import CoachClientDetail from './pages/coaching/coach/CoachClientDetail';
 import ClientDashboard from './pages/coaching/client/ClientDashboard';
 import ClientTraining from './pages/coaching/client/ClientTraining';
 import ClientNutrition from './pages/coaching/client/ClientNutrition';
@@ -64,7 +65,7 @@ function AppRoutes() {
           <Route element={<CoachingLayout />}>
             <Route path="/coaching" element={<CoachDashboard />} />
             <Route path="/coaching/clients" element={<CoachClients />} />
-            <Route path="/coaching/clients/:id" element={<CoachClients />} />
+            <Route path="/coaching/clients/:id" element={<CoachClientDetail />} />
             <Route path="/coaching/training" element={<CoachTraining />} />
             <Route path="/coaching/nutrition" element={<CoachNutrition />} />
             <Route path="/coaching/progress" element={<CoachProgress />} />

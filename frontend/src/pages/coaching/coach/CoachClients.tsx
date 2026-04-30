@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import type { CoachingClient } from '../../../types/coaching';
 
@@ -106,7 +106,11 @@ export default function CoachClients() {
                   {client.user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600 }}>{client.user?.name}</div>
+                  <Link to={`/coaching/clients/${client.id}`} style={{ fontWeight: 600, color: '#374151', textDecoration: 'none' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#C4703F')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#374151')}>
+                    {client.user?.name}
+                  </Link>
                   <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{client.user?.email}</div>
                 </div>
               </div>
@@ -117,7 +121,7 @@ export default function CoachClients() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => { previewUserType('client', client.id); navigate('/client'); }}
+                  onClick={async () => { await previewUserType('client', client.id); navigate('/client'); }}
                   style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem', borderRadius: 6, background: '#3A7AA0', color: '#fff', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
                 >
                   View as Client

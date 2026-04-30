@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -23,22 +24,38 @@ const NAV = [
 export default function ClientLayout() {
   const { user, logout, isPreviewMode, exitPreview } = useAuth();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const closeSidebar = () => setSidebarOpen(false);
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() ?? '?';
 
   return (
     <div className="ara-app-shell">
-      <aside className="ara-sidebar">
+      {/* Mobile top bar */}
+      <div className="ara-mobile-topbar">
+        <button type="button" className="ara-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span className="ara-mobile-topbar-title">Active <span className="ara-sidebar-wordmark-accent">Roots</span></span>
+      </div>
+
+      {/* Backdrop */}
+      {sidebarOpen && <div className="ara-sidebar-backdrop" onClick={closeSidebar} />}
+
+      <aside className={`ara-sidebar${sidebarOpen ? ' ara-sidebar-open' : ''}`}>
+        <button type="button" className="ara-sidebar-close" onClick={closeSidebar} aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
         <div className="ara-sidebar-logo">
           <img src="/logo-mark.svg" className="ara-sidebar-logo-img" alt="" />
           <div>
             <div className="ara-sidebar-wordmark">Active <span className="ara-sidebar-wordmark-accent">Roots</span></div>
-            <div className="ara-sidebar-sub">Coaching</div>
+            <div className="ara-sidebar-sub">Client Portal</div>
           </div>
         </div>
 
         <div className="ara-sidebar-dashboard">
           {NAV.map(({ to, label, icon, end }) => (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
+            <NavLink key={to} to={to} end={end} onClick={closeSidebar} className={({ isActive }) => `ara-nav-link${isActive ? ' active' : ''}`}>
               {icon}{label}
             </NavLink>
           ))}
@@ -52,14 +69,14 @@ export default function ClientLayout() {
               <div className="ara-sidebar-profile-role">Client</div>
             </div>
           </div>
-          <button className="ara-signout-btn" onClick={logout}>{Ic.signout}Sign out</button>
+          <button type="button" className="ara-signout-btn" onClick={logout}>{Ic.signout}Sign out</button>
         </div>
       </aside>
 
       <main className="ara-main-col">
         {isPreviewMode && (
           <div className="ara-preview-banner">
-            <span>Admin Preview — Client Portal</span>
+            <span>Coach Preview — Client Portal</span>
             <button type="button" onClick={() => { exitPreview(); navigate('/coaching'); }}>Exit Preview</button>
           </div>
         )}

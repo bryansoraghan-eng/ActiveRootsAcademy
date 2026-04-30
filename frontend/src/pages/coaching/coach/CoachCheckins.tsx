@@ -82,7 +82,12 @@ export default function CoachCheckins() {
                   </div>
                 ) : (
                   <div>
-                    {ci.notes && <div style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem', background: '#fef3e9', padding: '0.5rem 0.75rem', borderRadius: 6 }}>{ci.notes}</div>}
+                    {ci.notes && (
+                    <div className="ara-coach-note">
+                      <div className="ara-coach-note-label">Coach note</div>
+                      {ci.notes}
+                    </div>
+                  )}
                     <button type="button" onClick={() => { setEditingNote(ci.id); setNoteText(ci.notes ?? ''); }} style={{ fontSize: '0.8rem', color: '#C4703F', background: 'none', border: 'none', cursor: 'pointer' }}>
                       {ci.notes ? 'Edit note' : '+ Add note'}
                     </button>
