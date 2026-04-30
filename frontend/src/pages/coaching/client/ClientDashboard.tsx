@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import type { CoachingGoal } from '../../../types/coaching';
+import type { CoachingClient, CoachingGoal } from '../../../types/coaching';
 
 const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api';
 
 export default function ClientDashboard() {
   const { token, user, previewClientId } = useAuth();
-  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+  const [profile, setProfile] = useState<CoachingClient | null>(null);
   const [goals, setGoals] = useState<CoachingGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const cq = previewClientId ? `?clientId=${previewClientId}` : '';
@@ -16,11 +16,11 @@ export default function ClientDashboard() {
     Promise.all([
       fetch(`${API}/coaching/clients/me${cq}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
       fetch(`${API}/coaching/goals${cq}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-    ]).then(([p, g]) => { setProfile(p); setGoals(g); }).finally(() => setLoading(false));
+    ]).then(([p, g]) => { setProfile(p as CoachingClient | null); setGoals(g as CoachingGoal[]); }).finally(() => setLoading(false));
   }, [token, cq]);
 
-  const activePlan = (profile?.trainingPlans as Record<string, unknown>[] | undefined)?.[0] as Record<string, unknown> | undefined;
-  const target = (profile?.nutritionTargets as Record<string, unknown>[] | undefined)?.[0] as Record<string, unknown> | undefined;
+  const activePlan = profile?.trainingPlans?.[0];
+  const target = profile?.nutritionTargets?.[0];
 
   if (loading) return <div className="ara-page" style={{ color: '#94a3b8' }}>Loading…</div>;
 
@@ -86,7 +86,7 @@ export default function ClientDashboard() {
             <span style={{ fontWeight: 700 }}>Training Plan: {activePlan.name}</span>
             <Link to="/client/training" style={{ fontSize: '0.8rem', color: '#C4703F', textDecoration: 'none' }}>View full plan</Link>
           </div>
-          {(activePlan as { days?: { id: string; name: string; exercises?: unknown[] }[] }).days?.slice(0, 3).map((day) => (
+          {activePlan.days?.slice(0, 3).map((day) => (
             <div key={day.id} style={{ padding: '0.75rem 1.25rem', borderBottom: '1px solid #f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: 500, fontSize: '0.875rem' }}>{day.name}</div>

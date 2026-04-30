@@ -115,7 +115,7 @@ export default function CoachClients() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                {client.trainingPlans?.length > 0 && <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Active plan</span>}
+                {(client.trainingPlans?.length ?? 0) > 0 && <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Active plan</span>}
                 <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: 999, background: client.status === 'active' ? '#dcfce7' : '#f1f5f9', color: client.status === 'active' ? '#166534' : '#64748b' }}>
                   {client.status}
                 </span>
