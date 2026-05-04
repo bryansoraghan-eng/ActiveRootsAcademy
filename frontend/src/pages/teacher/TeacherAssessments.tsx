@@ -41,12 +41,12 @@ function FMSChart({ rows, skills }: { rows: ChartRow[]; skills: string[] }) {
         {/* one line per skill */}
         {skills.map((skill, si) => {
           const color = COLORS[si % COLORS.length];
-          const pts = rows.map((r, i) => `${xAt(i)},${yAt(r[skill] ?? 0)}`).join(' ');
+          const pts = rows.map((r, i) => `${xAt(i)},${yAt((r[skill] as number) ?? 0)}`).join(' ');
           return (
             <g key={skill}>
               <polyline points={pts} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
               {rows.map((r, i) => (
-                <circle key={i} cx={xAt(i)} cy={yAt(r[skill] ?? 0)} r={4} fill={color} />
+                <circle key={i} cx={xAt(i)} cy={yAt((r[skill] as number) ?? 0)} r={4} fill={color} />
               ))}
             </g>
           );
