@@ -11,7 +11,7 @@ interface Assessment {
   coach?: { name: string };
 }
 
-type ChartRow = { date: string } & Record<string, number>;
+type ChartRow = { date: string; [key: string]: string | number };
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899'];
 

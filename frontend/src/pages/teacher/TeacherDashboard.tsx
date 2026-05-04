@@ -5,7 +5,7 @@ import { api } from '../../lib/api';
 import { pickBreakForProgramme, pickRandomBreak, getCurrentSlot, hasCustomSlots, CAT_TONE } from '../../lib/breaksData';
 import type { BreakActivity } from '../../lib/breaksData';
 import { getDailyLunchbox } from '../../lib/lunchboxData';
-import type { DailyLunchbox, LunchboxItem } from '../../lib/lunchboxData';
+import type { DailyLunchbox } from '../../lib/lunchboxData';
 
 interface Booking {
   id: string; status: string; startDate: string; endDate: string;
