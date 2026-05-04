@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api';
-import { BREAKS, CAT_TONE } from '../../lib/breaksData';
-import type { BreakActivity } from '../../lib/breaksData';
+import { BREAKS, CAT_TONE, getCustomSlots, saveCustomSlots, DEFAULT_BREAK_SLOTS } from '../../lib/breaksData';
+import type { BreakActivity, BreakSlot } from '../../lib/breaksData';
 
 const MILESTONE_MESSAGES: Record<number, { title: string; body: string }> = {
   1:  { title: 'First break done!',       body: 'You\'ve completed your first movement break. Your class thanks you!' },
@@ -115,6 +116,13 @@ function BreakPlayer({ activity, onDone, onBack }: { activity: BreakActivity; on
       <h1 className="ara-break-player-title">{activity.title}</h1>
       <p className="ara-break-player-desc">{activity.desc}</p>
 
+      {activity.teacherTip && (
+        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '0.65rem 1rem', maxWidth: 380, width: '100%' }}>
+          <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 0.3rem' }}>Teacher tip</p>
+          <p style={{ fontSize: '0.84rem', color: '#78350f', margin: 0, lineHeight: 1.55, fontStyle: 'italic' }}>{activity.teacherTip}</p>
+        </div>
+      )}
+
       <div className="ara-timer-ring-wrap">
         <svg width="260" height="260" className="ara-timer-svg">
           <circle cx="130" cy="130" r="118" fill="none" stroke="var(--ara-ink-100)" strokeWidth="10"/>
@@ -157,13 +165,21 @@ function BreakPlayer({ activity, onDone, onBack }: { activity: BreakActivity; on
 type View = 'library' | 'player';
 
 export default function TeacherMovementBreaks() {
-  const [view, setView] = useState<View>('library');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // If navigated from dashboard with a pre-selected break, go straight to the player
+  const navBreak = (location.state as { initialBreak?: BreakActivity } | null)?.initialBreak ?? null;
+
+  const [view, setView] = useState<View>(navBreak ? 'player' : 'library');
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
-  const [active, setActive] = useState<BreakActivity | null>(null);
+  const [active, setActive] = useState<BreakActivity | null>(navBreak);
   const [streak, setStreak] = useState<StreakData>({ currentStreak: 0, longestStreak: 0, totalDays: 0, todayCount: 0 });
   const [milestone, setMilestone] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
+  const [timesOpen, setTimesOpen] = useState(false);
+  const [customSlots, setCustomSlots] = useState<BreakSlot[]>(getCustomSlots);
 
   const cats = ['All', 'Movement', 'Calming', 'Focus'];
 
@@ -171,7 +187,11 @@ export default function TeacherMovementBreaks() {
     api.get<StreakData>('/break-completions/streak')
       .then(setStreak)
       .catch(() => {});
-  }, []);
+    // Clear navigation state so pressing Back doesn't re-trigger the player
+    if (navBreak) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, []); // intentional: run once on mount
 
   const filtered = BREAKS.filter(b =>
     (filter === 'All' || b.cat === filter) &&
@@ -193,6 +213,15 @@ export default function TeacherMovementBreaks() {
     setActive(null);
   };
 
+  const handleSaveSlots = () => {
+    saveCustomSlots(customSlots);
+    setTimesOpen(false);
+  };
+
+  const updateSlot = (i: number, patch: Partial<BreakSlot>) => {
+    setCustomSlots(prev => prev.map((s, idx) => idx === i ? { ...s, ...patch } : s));
+  };
+
   return (
     <div className="ara-web-portal-root">
       {milestone && <CongratsModal milestone={milestone} onClose={() => setMilestone(null)} />}
@@ -211,7 +240,17 @@ export default function TeacherMovementBreaks() {
               <h1 className="ara-portal-title">Movement breaks</h1>
               <p className="ara-portal-lede">Short activities for your classroom, sorted by energy level.</p>
             </div>
-            {recording && <span className="ara-td-sub">Saving…</span>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+              {recording && <span className="ara-td-sub">Saving…</span>}
+              <button
+                type="button"
+                onClick={() => { setCustomSlots(getCustomSlots()); setTimesOpen(true); }}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '0.45rem 0.85rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}
+              >
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                Edit break times
+              </button>
+            </div>
           </div>
 
           <StreakBar streak={streak} />
@@ -248,6 +287,65 @@ export default function TeacherMovementBreaks() {
             ))}
           </div>
         </>
+      )}
+
+      {/* Edit break times modal */}
+      {timesOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }} onClick={() => setTimesOpen(false)} />
+          <div style={{ position: 'relative', background: '#fff', borderRadius: 20, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{ padding: '1.1rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b', margin: 0 }}>Choose your movement break times</h2>
+              <button
+                type="button"
+                onClick={() => setTimesOpen(false)}
+                style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1.1rem', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              >×</button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.55 }}>
+                These are suggestions only — you can do a break anytime.
+              </p>
+
+              {customSlots.map((slot, i) => (
+                <div key={slot.name} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 0.85rem', background: slot.enabled ? '#f8fafc' : '#fafafa', borderRadius: 10, border: `1px solid ${slot.enabled ? '#e2e8f0' : '#f1f5f9'}` }}>
+                  <input
+                    type="checkbox"
+                    checked={slot.enabled}
+                    onChange={e => updateSlot(i, { enabled: e.target.checked })}
+                    style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0, accentColor: 'var(--brand)' }}
+                  />
+                  <span style={{ flex: 1, fontSize: '0.88rem', fontWeight: 600, color: slot.enabled ? '#1e293b' : '#94a3b8' }}>{slot.name}</span>
+                  <input
+                    type="time"
+                    value={slot.time}
+                    disabled={!slot.enabled}
+                    onChange={e => updateSlot(i, { time: e.target.value })}
+                    style={{ fontSize: '0.85rem', fontWeight: 500, color: slot.enabled ? '#334155' : '#94a3b8', border: '1px solid #e2e8f0', borderRadius: 6, padding: '0.3rem 0.5rem', background: '#fff', cursor: slot.enabled ? 'pointer' : 'default' }}
+                  />
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setCustomSlots(DEFAULT_BREAK_SLOTS)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', color: '#94a3b8', padding: 0, textAlign: 'left' }}
+              >
+                Reset to defaults
+              </button>
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: '0 1.5rem 1.25rem' }}>
+              <button type="button" className="ara-btn ara-btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSaveSlots}>
+                Save my day
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

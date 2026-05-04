@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 
 type Category = 'all' | 'locomotion' | 'object_control' | 'stability';
+type TabKey = 'cues' | 'progressions' | 'errors';
 
 interface Progression { id: string; direction: string; description: string; ageGroup?: string; difficulty: number; }
 interface Cue { id: string; cue: string; ageGroup?: string; cueType: string; }
@@ -16,29 +17,57 @@ interface FMSSkill {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  locomotion: 'Locomotion',
+  locomotion:    'Locomotion',
   object_control: 'Object Control',
-  stability: 'Stability',
+  stability:     'Stability',
 };
 
-const CATEGORY_COLOURS: Record<string, { bg: string; text: string; border: string }> = {
-  locomotion: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  object_control: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
-  stability: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+const CATEGORY_STYLE: Record<string, { badge: string; badgeText: string; accent: string }> = {
+  locomotion:    { badge: '#dbeafe', badgeText: '#1d4ed8', accent: '#eff6ff' },
+  object_control: { badge: '#dcfce7', badgeText: '#15803d', accent: '#f0fdf4' },
+  stability:     { badge: '#f3e8ff', badgeText: '#7c3aed', accent: '#faf5ff' },
+};
+
+const SPACE_LABEL: Record<string, string> = {
+  hall:    'Hall only',
+  outdoor: 'Outdoor only',
+  both:    'Hall or outdoor',
+};
+
+const CUE_TYPE_STYLE: Record<string, { label: string; bg: string; text: string }> = {
+  verbal:       { label: 'Verbal',       bg: '#eff6ff', text: '#1d4ed8' },
+  visual:       { label: 'Visual',       bg: '#fff7ed', text: '#c2410c' },
+  kinaesthetic: { label: 'Kinaesthetic', bg: '#f0fdf4', text: '#15803d' },
 };
 
 const DIFFICULTY_LABELS = ['', 'Very Easy', 'Easy', 'Moderate', 'Hard', 'Advanced'];
 
-const CUE_ICONS: Record<string, string> = { verbal: '💬', visual: '👁', kinaesthetic: '🤲' };
-
 function DifficultyDots({ level }: { level: number }) {
   return (
-    <div className="flex gap-0.5">
+    <div style={{ display: 'flex', gap: 3 }}>
       {[1,2,3,4,5].map(n => (
-        <div key={n} className={`w-2 h-2 rounded-full ${n <= level ? 'bg-blue-500' : 'bg-slate-200'}`} />
+        <div key={n} style={{ width: 8, height: 8, borderRadius: '50%', background: n <= level ? '#3b82f6' : '#e2e8f0' }} />
       ))}
     </div>
   );
+}
+
+function IcCheck() {
+  return <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>;
+}
+function IcX() {
+  return <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>;
+}
+function IcChevron({ open }: { open: boolean }) {
+  return (
+    <svg style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path d="M19 9l-7 7-7-7"/>
+    </svg>
+  );
+}
+
+function parseJson(str: string): string[] {
+  try { return JSON.parse(str); } catch { return []; }
 }
 
 export default function FMSLibrary() {
@@ -47,7 +76,7 @@ export default function FMSLibrary() {
   const [error, setError] = useState('');
   const [category, setCategory] = useState<Category>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Record<string, 'cues' | 'progressions' | 'errors'>>({});
+  const [activeTab, setActiveTab] = useState<Record<string, TabKey>>({});
 
   useEffect(() => {
     api.get<FMSSkill[]>('/fms')
@@ -57,21 +86,15 @@ export default function FMSLibrary() {
   }, []);
 
   const visible = category === 'all' ? skills : skills.filter(s => s.category === category);
-
-  const byCategory = {
-    locomotion: visible.filter(s => s.category === 'locomotion'),
+  const byCategory: Record<string, FMSSkill[]> = {
+    locomotion:    visible.filter(s => s.category === 'locomotion'),
     object_control: visible.filter(s => s.category === 'object_control'),
-    stability: visible.filter(s => s.category === 'stability'),
+    stability:     visible.filter(s => s.category === 'stability'),
   };
 
-  const getTab = (skillId: string) => activeTab[skillId] ?? 'cues';
-  const setTab = (skillId: string, tab: 'cues' | 'progressions' | 'errors') => {
-    setActiveTab(prev => ({ ...prev, [skillId]: tab }));
-  };
-
+  const getTab = (id: string): TabKey => activeTab[id] ?? 'cues';
+  const setTab = (id: string, tab: TabKey) => setActiveTab(prev => ({ ...prev, [id]: tab }));
   const toggle = (id: string) => setExpanded(prev => prev === id ? null : id);
-
-  const parseJson = (str: string) => { try { return JSON.parse(str); } catch { return []; } };
 
   if (loading) return <div className="ara-loading">Loading FMS Library…</div>;
 
@@ -81,198 +104,216 @@ export default function FMSLibrary() {
         <div>
           <h1 className="ara-page-title">FMS Knowledge Library</h1>
           <p className="ara-page-subtitle">
-            {skills.length} Fundamental Movement Skills — Active Roots Academy's expert knowledge base of teaching cues, progressions, and error corrections
+            {skills.length} Fundamental Movement Skills — teaching cues, progressions, and error corrections
           </p>
         </div>
       </div>
 
       <div className="ara-page">
-      {error && <div className="ara-error">{error}</div>}
+        {error && <div className="ara-error">{error}</div>}
 
-      {skills.length === 0 && !loading && (
-        <div className="ara-seed-notice">
-          <div className="ara-pending-banner-header">FMS Library not yet seeded</div>
-          <div className="ara-seed-notice-body">
-            <p className="ara-td-sub">Run the FMS seed script to populate the knowledge base:</p>
-            <code className="ara-code ara-code-block">
-              cd backend &amp;&amp; npx ts-node prisma/seed-fms.ts
-            </code>
+        {skills.length === 0 && !loading && !error && (
+          <div className="ara-seed-notice">
+            <div className="ara-pending-banner-header">FMS Library not yet seeded</div>
+            <div className="ara-seed-notice-body">
+              <p className="ara-td-sub">Run the FMS seed script to populate the knowledge base:</p>
+              <code className="ara-code ara-code-block">cd backend &amp;&amp; npx ts-node prisma/seed-fms.ts</code>
+            </div>
           </div>
+        )}
+
+        {/* Category filter */}
+        <div className="ara-filter-strip">
+          {(['all', 'locomotion', 'object_control', 'stability'] as Category[]).map(cat => (
+            <button key={cat} type="button" onClick={() => setCategory(cat)}
+              className={`ara-filter-btn${category === cat ? ' ara-filter-btn-active' : ''}`}>
+              {cat === 'all'
+                ? `All Skills (${skills.length})`
+                : `${CATEGORY_LABELS[cat]} (${skills.filter(s => s.category === cat).length})`}
+            </button>
+          ))}
         </div>
-      )}
 
-      {/* Category filter tabs */}
-      <div className="ara-filter-strip">
-        {(['all', 'locomotion', 'object_control', 'stability'] as Category[]).map(cat => (
-          <button key={cat} type="button" onClick={() => setCategory(cat)}
-            className={`ara-filter-btn${category === cat ? ' ara-filter-btn-active' : ''}`}>
-            {cat === 'all' ? `All Skills (${skills.length})` : `${CATEGORY_LABELS[cat]} (${skills.filter(s => s.category === cat).length})`}
-          </button>
-        ))}
-      </div>
+        {/* Skills grouped by category */}
+        {(Object.entries(byCategory) as [string, FMSSkill[]][]).map(([cat, catSkills]) => {
+          if (catSkills.length === 0) return null;
+          const style = CATEGORY_STYLE[cat];
+          return (
+            <div key={cat} style={{ marginBottom: '2rem' }}>
+              {/* Category heading */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <h2 style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+                  {CATEGORY_LABELS[cat]}
+                </h2>
+                <div style={{ flex: 1, height: 1, background: '#f1f5f9' }} />
+                <span style={{ fontSize: '0.72rem', fontWeight: 600, background: style.badge, color: style.badgeText, borderRadius: 999, padding: '0.2rem 0.65rem' }}>
+                  {catSkills.length} skill{catSkills.length !== 1 ? 's' : ''}
+                </span>
+              </div>
 
-      {/* Skills grouped by category */}
-      {Object.entries(byCategory).map(([cat, catSkills]) => {
-        if (catSkills.length === 0) return null;
-        const colours = CATEGORY_COLOURS[cat];
-        return (
-          <div key={cat} className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-widest">{CATEGORY_LABELS[cat]}</h2>
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colours.bg} ${colours.text}`}>
-                {catSkills.length} skill{catSkills.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-            <div className="space-y-2">
-              {catSkills.map(skill => (
-                <div key={skill.id} className={`bg-white rounded-xl border overflow-hidden transition-shadow ${expanded === skill.id ? 'border-blue-200 shadow-md' : 'border-slate-200'}`}>
-                  {/* Skill header */}
-                  <button
-                    type="button"
-                    onClick={() => toggle(skill.id)}
-                    className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-slate-50 transition"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${colours.bg} ${colours.text}`}>
-                        {skill.name.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-slate-800">{skill.name}</p>
-                          {skill.isScoilnet && (
-                            <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Core Skill</span>
-                          )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {catSkills.map(skill => {
+                  const isOpen = expanded === skill.id;
+                  const tab = getTab(skill.id);
+                  return (
+                    <div key={skill.id} style={{ background: '#fff', borderRadius: 12, border: `1px solid ${isOpen ? style.badge : '#e2e8f0'}`, overflow: 'hidden', boxShadow: isOpen ? '0 2px 12px rgba(0,0,0,0.06)' : 'none' }}>
+
+                      {/* Skill header row */}
+                      <button
+                        type="button"
+                        onClick={() => toggle(skill.id)}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0 }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0, background: style.badge, color: style.badgeText, letterSpacing: '0.02em' }}>
+                            {skill.name.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>{skill.name}</span>
+                              {skill.isScoilnet && (
+                                <span style={{ fontSize: '0.62rem', fontWeight: 700, background: style.accent, color: style.badgeText, borderRadius: 999, padding: '0.15rem 0.55rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                  Core Skill
+                                </span>
+                              )}
+                            </div>
+                            <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.15rem 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 480 }}>
+                              {skill.description}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{skill.description}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-                      <div className="hidden sm:flex gap-3 text-xs text-slate-500">
-                        <span>{skill.cues.length} cues</span>
-                        <span>{skill.progressions.length} progressions</span>
-                        <span>{skill.errors.length} errors</span>
-                      </div>
-                      <svg className={`w-4 h-4 text-slate-400 transition-transform ${expanded === skill.id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path d="M19 9l-7 7-7-7"/>
-                      </svg>
-                    </div>
-                  </button>
-
-                  {/* Expanded content */}
-                  {expanded === skill.id && (
-                    <div className="border-t border-slate-100">
-                      {/* Metadata row */}
-                      <div className="px-6 py-3 bg-slate-50 flex flex-wrap gap-3 text-xs text-slate-600">
-                        <span className="flex items-center gap-1">
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                          {skill.spaceNeeded}
-                        </span>
-                        {parseJson(skill.ageGroups).map((ag: string) => (
-                          <span key={ag} className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full capitalize">{ag}</span>
-                        ))}
-                        {parseJson(skill.equipment).map((eq: string) => (
-                          <span key={eq} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{eq}</span>
-                        ))}
-                      </div>
-
-                      {/* Tabs */}
-                      <div className="px-6 pt-4">
-                        <div className="flex gap-1 border-b border-slate-100 mb-4">
-                          {(['cues', 'progressions', 'errors'] as const).map(tab => (
-                            <button key={tab} type="button" onClick={() => setTab(skill.id, tab)}
-                              className={`px-4 py-2 text-sm font-medium capitalize transition border-b-2 -mb-px ${
-                                getTab(skill.id) === tab
-                                  ? 'border-blue-600 text-blue-700'
-                                  : 'border-transparent text-slate-500 hover:text-slate-700'
-                              }`}>
-                              {tab === 'cues' ? 'Teaching Cues' : tab === 'progressions' ? 'Progressions & Regressions' : 'Common Errors'}
-                              <span className="ml-1.5 text-xs text-slate-400">
-                                ({tab === 'cues' ? skill.cues.length : tab === 'progressions' ? skill.progressions.length : skill.errors.length})
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0, marginLeft: '1rem' }}>
+                          <div style={{ display: 'flex', gap: '1rem' }}>
+                            {[
+                              { n: skill.cues.length, label: 'cues' },
+                              { n: skill.progressions.length, label: 'progressions' },
+                              { n: skill.errors.length, label: 'errors' },
+                            ].map(({ n, label }) => (
+                              <span key={label} style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                                <strong style={{ color: '#475569' }}>{n}</strong> {label}
                               </span>
-                            </button>
-                          ))}
+                            ))}
+                          </div>
+                          <span style={{ color: '#94a3b8' }}><IcChevron open={isOpen} /></span>
                         </div>
+                      </button>
 
-                        {/* Cues tab */}
-                        {getTab(skill.id) === 'cues' && (
-                          <div className="pb-5 space-y-2">
-                            {skill.cues.length === 0 && <p className="text-slate-400 text-sm">No cues added yet.</p>}
-                            {skill.cues.map(cue => (
-                              <div key={cue.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-                                <span className="text-base flex-shrink-0 mt-0.5">{CUE_ICONS[cue.cueType] ?? '💬'}</span>
-                                <div>
-                                  <p className="text-sm text-slate-800">{cue.cue}</p>
-                                  {cue.ageGroup && (
-                                    <span className="text-xs text-slate-500 mt-0.5 inline-block">For: {cue.ageGroup}</span>
-                                  )}
-                                </div>
-                                <span className="ml-auto text-xs text-slate-400 capitalize flex-shrink-0">{cue.cueType}</span>
-                              </div>
+                      {/* Expanded content */}
+                      {isOpen && (
+                        <div style={{ borderTop: '1px solid #f1f5f9' }}>
+                          {/* Metadata row */}
+                          <div style={{ padding: '0.6rem 1.25rem', background: '#f8fafc', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#e2e8f0', borderRadius: 999, padding: '0.2rem 0.65rem' }}>
+                              {SPACE_LABEL[skill.spaceNeeded] ?? skill.spaceNeeded}
+                            </span>
+                            {parseJson(skill.ageGroups).map((ag: string) => (
+                              <span key={ag} style={{ fontSize: '0.72rem', background: style.badge, color: style.badgeText, borderRadius: 999, padding: '0.2rem 0.65rem' }}>{ag}</span>
+                            ))}
+                            {parseJson(skill.equipment).map((eq: string) => (
+                              <span key={eq} style={{ fontSize: '0.72rem', background: '#f1f5f9', color: '#475569', borderRadius: 999, padding: '0.2rem 0.65rem' }}>{eq}</span>
                             ))}
                           </div>
-                        )}
 
-                        {/* Progressions tab */}
-                        {getTab(skill.id) === 'progressions' && (
-                          <div className="pb-5 space-y-3">
-                            {['regression', 'progression'].map(dir => {
-                              const items = skill.progressions.filter(p => p.direction === dir);
-                              if (items.length === 0) return null;
-                              return (
-                                <div key={dir}>
-                                  <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${dir === 'regression' ? 'text-amber-600' : 'text-green-600'}`}>
-                                    {dir === 'regression' ? '▼ Regressions (easier)' : '▲ Progressions (harder)'}
-                                  </p>
-                                  <div className="space-y-2">
-                                    {items.map(p => (
-                                      <div key={p.id} className="flex items-start gap-3 p-3 rounded-lg border border-slate-100">
-                                        <DifficultyDots level={p.difficulty} />
-                                        <div className="flex-1 min-w-0">
-                                          <p className="text-sm text-slate-800">{p.description}</p>
-                                          {p.ageGroup && <span className="text-xs text-slate-400">{p.ageGroup}</span>}
-                                        </div>
-                                        <span className="text-xs text-slate-400 flex-shrink-0">{DIFFICULTY_LABELS[p.difficulty]}</span>
+                          {/* Tabs */}
+                          <div style={{ padding: '0 1.25rem' }}>
+                            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #f1f5f9', marginBottom: 0 }}>
+                              {(['cues', 'progressions', 'errors'] as TabKey[]).map(t => {
+                                const count = t === 'cues' ? skill.cues.length : t === 'progressions' ? skill.progressions.length : skill.errors.length;
+                                const labels = { cues: 'Teaching Cues', progressions: 'Progressions & Regressions', errors: 'Common Errors' };
+                                return (
+                                  <button key={t} type="button" onClick={() => setTab(skill.id, t)}
+                                    style={{ padding: '0.7rem 1rem', fontSize: '0.8rem', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', borderBottom: `2px solid ${tab === t ? style.badgeText : 'transparent'}`, color: tab === t ? style.badgeText : '#94a3b8', transition: 'color 0.15s' }}>
+                                    {labels[t]}
+                                    <span style={{ marginLeft: '0.35rem', fontSize: '0.7rem', color: '#cbd5e1' }}>({count})</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {/* Cues tab */}
+                            {tab === 'cues' && (
+                              <div style={{ padding: '1rem 0 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {skill.cues.length === 0 && <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: 0 }}>No cues added yet.</p>}
+                                {skill.cues.map(cue => {
+                                  const ct = CUE_TYPE_STYLE[cue.cueType] ?? { label: cue.cueType, bg: '#f1f5f9', text: '#475569' };
+                                  return (
+                                    <div key={cue.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '0.75rem', background: '#f8fafc', borderRadius: 8 }}>
+                                      <span style={{ fontSize: '0.62rem', fontWeight: 700, background: ct.bg, color: ct.text, borderRadius: 999, padding: '0.2rem 0.6rem', flexShrink: 0, whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                        {ct.label}
+                                      </span>
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p style={{ fontSize: '0.85rem', color: '#1e293b', margin: 0, lineHeight: 1.55 }}>{cue.cue}</p>
+                                        {cue.ageGroup && (
+                                          <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.2rem', display: 'inline-block' }}>For: {cue.ageGroup}</span>
+                                        )}
                                       </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {/* Errors tab */}
-                        {getTab(skill.id) === 'errors' && (
-                          <div className="pb-5 space-y-3">
-                            {skill.errors.length === 0 && <p className="text-slate-400 text-sm">No errors documented yet.</p>}
-                            {skill.errors.map(err => (
-                              <div key={err.id} className="rounded-xl border border-slate-100 overflow-hidden">
-                                <div className="flex items-start gap-2 p-3 bg-red-50">
-                                  <span className="text-red-500 text-sm flex-shrink-0 mt-0.5">✕</span>
-                                  <div>
-                                    <p className="text-sm font-medium text-red-800">{err.error}</p>
-                                    {err.ageGroup && <span className="text-xs text-red-500">{err.ageGroup}</span>}
-                                  </div>
-                                </div>
-                                <div className="flex items-start gap-2 p-3 bg-green-50">
-                                  <span className="text-green-600 text-sm flex-shrink-0 mt-0.5">✓</span>
-                                  <p className="text-sm text-green-800">{err.correction}</p>
-                                </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            ))}
+                            )}
+
+                            {/* Progressions tab */}
+                            {tab === 'progressions' && (
+                              <div style={{ padding: '1rem 0 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {(['regression', 'progression'] as const).map(dir => {
+                                  const items = skill.progressions.filter(p => p.direction === dir);
+                                  if (items.length === 0) return null;
+                                  return (
+                                    <div key={dir}>
+                                      <p style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 0.5rem', color: dir === 'regression' ? '#b45309' : '#15803d' }}>
+                                        {dir === 'regression' ? '▼ Regressions (easier)' : '▲ Progressions (harder)'}
+                                      </p>
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                        {items.map(p => (
+                                          <div key={p.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '0.75rem', border: '1px solid #f1f5f9', borderRadius: 8 }}>
+                                            <DifficultyDots level={p.difficulty} />
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                              <p style={{ fontSize: '0.85rem', color: '#1e293b', margin: 0, lineHeight: 1.55 }}>{p.description}</p>
+                                              {p.ageGroup && <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{p.ageGroup}</span>}
+                                            </div>
+                                            <span style={{ fontSize: '0.7rem', color: '#94a3b8', flexShrink: 0 }}>{DIFFICULTY_LABELS[p.difficulty]}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* Errors tab */}
+                            {tab === 'errors' && (
+                              <div style={{ padding: '1rem 0 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {skill.errors.length === 0 && <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: 0 }}>No errors documented yet.</p>}
+                                {skill.errors.map(err => (
+                                  <div key={err.id} style={{ borderRadius: 10, border: '1px solid #fee2e2', overflow: 'hidden' }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '0.7rem 0.85rem', background: '#fef2f2' }}>
+                                      <span style={{ color: '#dc2626', flexShrink: 0, marginTop: '0.05rem' }}><IcX /></span>
+                                      <div>
+                                        <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#991b1b', margin: 0, lineHeight: 1.45 }}>{err.error}</p>
+                                        {err.ageGroup && <span style={{ fontSize: '0.72rem', color: '#b91c1c' }}>{err.ageGroup}</span>}
+                                      </div>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '0.7rem 0.85rem', background: '#f0fdf4' }}>
+                                      <span style={{ color: '#16a34a', flexShrink: 0, marginTop: '0.05rem' }}><IcCheck /></span>
+                                      <p style={{ fontSize: '0.85rem', color: '#166534', margin: 0, lineHeight: 1.55 }}>{err.correction}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })}
-      </div>{/* end ara-page */}
+          );
+        })}
+      </div>
     </div>
   );
 }

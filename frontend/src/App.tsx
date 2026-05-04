@@ -22,6 +22,7 @@ import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import TeacherClasses from './pages/teacher/TeacherClasses';
 import TeacherAssessments from './pages/teacher/TeacherAssessments';
 import TeacherMovementBreaks from './pages/teacher/TeacherMovementBreaks';
+import TeacherNutritionGuide from './pages/teacher/TeacherNutritionGuide';
 import TeacherRegister from './pages/TeacherRegister';
 import Register from './pages/Register';
 import Users from './pages/Users';
@@ -103,9 +104,7 @@ function AppRoutes() {
             <Route path="/teacher" element={<TeacherDashboard />} />
             <Route path="/teacher/classes" element={<TeacherClasses />} />
             <Route path="/teacher/assessments" element={<TeacherAssessments />} />
-            <Route path="/teacher/nutrition" element={<Nutrition />} />
-            <Route path="/teacher/lesson-plans" element={<LessonPlans />} />
-            <Route path="/teacher/fms" element={<FMSLibrary />} />
+            <Route path="/teacher/nutrition" element={<TeacherNutritionGuide />} />
             <Route path="/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
           </Route>
           <Route path="*" element={<Navigate to="/teacher" replace />} />
@@ -137,9 +136,7 @@ function AppRoutes() {
           <Route path="/preview/teacher" element={<TeacherDashboard />} />
           <Route path="/preview/teacher/classes" element={<TeacherClasses />} />
           <Route path="/preview/teacher/assessments" element={<TeacherAssessments />} />
-          <Route path="/preview/teacher/nutrition" element={<Nutrition />} />
-          <Route path="/preview/teacher/lesson-plans" element={<LessonPlans />} />
-          <Route path="/preview/teacher/fms" element={<FMSLibrary />} />
+          <Route path="/preview/teacher/nutrition" element={<TeacherNutritionGuide />} />
           <Route path="/preview/teacher/movement-breaks" element={<TeacherMovementBreaks />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

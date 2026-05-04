@@ -6,6 +6,7 @@ interface Class {
   id: string;
   name: string;
   yearGroup: string;
+  teacherId?: string | null;
   school: { name: string };
   teacher?: { name: string };
   assessments: { id: string; date: string }[];
@@ -22,7 +23,7 @@ export default function TeacherClasses() {
     const load = async () => {
       try {
         const all = await api.get<Class[]>('/classes');
-        const mine = all.filter((c: Class) => c.school?.name === user?.school?.name);
+        const mine = all.filter((c: Class) => c.teacherId === user?.id);
         setClasses(mine);
       } catch {
         // silently fail
@@ -44,7 +45,7 @@ export default function TeacherClasses() {
         <div className="text-slate-400 text-sm">Loading…</div>
       ) : classes.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <p className="text-slate-400 text-sm">No classes assigned to you yet.</p>
+          <p className="text-slate-400 text-sm">No classes assigned to you yet — ask your admin to assign your class to your account.</p>
         </div>
       ) : (
         <div className="space-y-3">
